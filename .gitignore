@@ -1,0 +1,35 @@
+
+#///////////////////////////
+# Cocos Creator 3D Project
+#///////////////////////////
+library/
+temp/
+local/
+build/
+profiles/
+native
+#//////////////////////////
+# NPM
+#//////////////////////////
+node_modules/
+
+#//////////////////////////
+# VSCode
+#//////////////////////////
+.vscode/
+
+#//////////////////////////
+# WebStorm
+#//////////////////////////
+.idea/
+assets/config
+assets/resources
+assets/**/*.js
+assets/**/*.js.map      # SourceMap 文件
+/node_modules/
+/release/                # 打包后的发布目录
+*.apk
+*.ipa
+*.exe
+*.dmg
+settings
