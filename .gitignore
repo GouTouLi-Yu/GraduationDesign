@@ -22,8 +22,6 @@ node_modules/
 # WebStorm
 #//////////////////////////
 .idea/
-assets/config
-assets/resources
 assets/**/*.js
 assets/**/*.js.map      # SourceMap 文件
 /node_modules/
