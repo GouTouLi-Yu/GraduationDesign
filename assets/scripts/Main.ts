@@ -6,7 +6,7 @@ export class Main extends Component {
     protected onLoad(): void {}
 
     start() {
-        let a = 4;
+        let a = 3;
         let b = 5;
     }
 
