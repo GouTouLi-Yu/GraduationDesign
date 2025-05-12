@@ -1,4 +1,4 @@
-import { instantiate, Node, Prefab, resources } from "cc";
+import { instantiate, Node, Prefab, resources, SpriteFrame } from "cc";
 
 export class ResManager {
     static loadPrefab(path: string): Promise<Node> {
@@ -16,4 +16,18 @@ export class ResManager {
             return null;
         });
     }
+    static loadTexture(path: string): Promise<SpriteFrame> {
+        return new Promise((reslove, reject) => {
+            resources.load(path, SpriteFrame, (err: Error, sf: SpriteFrame) => {
+                if (err) {
+                    reject(err);
+                }
+                else {
+                    reslove(sf);
+                }
+
+            })
+        })
+    }
 }
+
