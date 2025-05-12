@@ -6,13 +6,14 @@ export class ResManager {
             resources.load(path, Prefab, (err: Error, prefab: Prefab) => {
                 if (err) {
                     reject(err);
-                } else {
-                    let node = instantiate(prefab);
-                    if (node) {
-                        resolve(node);
-                    }
+                    return;
                 }
+                let node = instantiate(prefab);
+                resolve(node);
             });
+        }).catch((err) => {
+            console.error(`Failed to load prefab at ${path}:`, err);
+            return null;
         });
     }
 }
