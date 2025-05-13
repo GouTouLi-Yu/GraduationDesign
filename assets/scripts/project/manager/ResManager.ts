@@ -1,4 +1,4 @@
-import { instantiate, Node, Prefab, resources, SpriteFrame } from "cc";
+import { instantiate, Node, Prefab, resources, Sprite, SpriteFrame } from "cc";
 
 export class ResManager {
     static loadPrefab(path: string): Promise<Node> {
@@ -16,18 +16,25 @@ export class ResManager {
             return null;
         });
     }
-    static loadTexture(path: string): Promise<SpriteFrame> {
-        return new Promise((reslove, reject) => {
-            resources.load(path, SpriteFrame, (err: Error, sf: SpriteFrame) => {
-                if (err) {
-                    reject(err);
-                }
-                else {
-                    reslove(sf);
-                }
 
-            })
-        })
+    /** 动态加载图片 */
+    static loadTexture(node: Node, path: string) {
+        if (!node) {
+            console.error(`${node.name} is null or undefined`);
+            return;
+        }
+        let sprite = node.getComponent(Sprite);
+        if (!sprite) {
+            console.error(`${node.name} is not a SpriteFrame`);
+            return;
+        }
+        path = path + "/SpriteFrame";
+        resources.load(path, SpriteFrame, (err: Error, sf: SpriteFrame) => {
+            if (err) {
+                console.error(`Failed to load texture at ${path}:`, err);
+                return;
+            }
+            sprite.spriteFrame = sf;
+        });
     }
 }
-
