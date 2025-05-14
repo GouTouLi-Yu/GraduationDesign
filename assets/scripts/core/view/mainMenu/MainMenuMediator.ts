@@ -1,14 +1,7 @@
-import { _decorator, Component, Node } from 'cc';
-const { ccclass, property } = _decorator;
+import { ClassConfig } from "../../../project/config/ClassConfig";
+import { PopupMediator } from "../PopupMediator";
 
-@ccclass('MainMenuMediator')
-export class MainMenuMediator extends Component {
-    start() {
-
-    }
-
-    update(deltaTime: number) {
-        
-    }
+export class MainMenuMediator extends PopupMediator {
+    static fullPath: string = "prefab/mainMenu/";
 }
-
+ClassConfig.addClass("MainMenuMediator", MainMenuMediator);

@@ -1,7 +1,8 @@
-import { _decorator, Component } from "cc";
-import { ClassConfig } from "./project/config/ClassConfig";
+import { _decorator, Component, DynamicAtlasManager } from "cc";
+import { UIManager } from "./project/manager/UIManager";
 const { ccclass, property } = _decorator;
 
+DynamicAtlasManager.instance.enabled = false;
 @ccclass("Main")
 export class Main extends Component {
     protected onLoad(): void {
@@ -9,10 +10,12 @@ export class Main extends Component {
     }
 
     private initStaticClass() {
-        ClassConfig.init();
+        // Injector.init();
     }
 
-    start() {}
+    start() {
+        UIManager.gotoView("MainMenuView");
+    }
 
     update(deltaTime: number) {}
 }

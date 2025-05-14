@@ -1,7 +1,8 @@
 import { Node } from "cc";
-import { Mediator } from "../../core/view/Mediator";
+import { EMediatorType, Mediator } from "../../core/view/Mediator";
 import { ClassConfig } from "../config/ClassConfig";
 import { ResManager } from "./ResManager";
+import { SceneManager } from "./SceneManager";
 
 export class UIManager {
     /** 跳转场景 */
@@ -11,7 +12,9 @@ export class UIManager {
      * @param params
      */
     static gotoView(viewName: string, params?: any): Promise<Node> {
+        // 传进来MainMenuView
         let viewNameWithOutSuffix = viewName.slice(0, -4);
+        // 得到MainMenu
         let layerName = viewNameWithOutSuffix + "Layer";
         let mediatorName = viewNameWithOutSuffix + "Mediator";
         let mediator: Mediator = ClassConfig.getClass(mediatorName);
@@ -20,6 +23,15 @@ export class UIManager {
             return;
         }
         let layerPath = mediator.fullPath + layerName;
-        return ResManager.loadPrefab(layerPath);
+        let PromiseNode: Promise<Node> = ResManager.loadPrefab(layerPath);
+        let parentNode: Node;
+        PromiseNode.then((node: Node) => {
+            if (mediator.type == EMediatorType.popup) {
+                parentNode = SceneManager.popupLayer;
+            } else {
+                parentNode = SceneManager.areaLayer;
+            }
+            parentNode.addChildCC(node);
+        });
     }
 }

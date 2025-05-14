@@ -1,7 +1,7 @@
 [
   {
     "__type__": "cc.Prefab",
-    "_name": "mainMenuLayer",
+    "_name": "MainMenuLayer",
     "_objFlags": 0,
     "__editorExtras__": {},
     "_native": "",
@@ -13,7 +13,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "mainMenuLayer",
+    "_name": "MainMenuLayer",
     "_objFlags": 0,
     "__editorExtras__": {},
     "_parent": null,
@@ -1692,6 +1692,8 @@
       "__id__": 0
     },
     "fileId": "abgFq1sDdMWppeGujlXbXL",
+    "instance": null,
+    "targetOverrides": null,
     "nestedPrefabInstanceRoots": null
   },
   {

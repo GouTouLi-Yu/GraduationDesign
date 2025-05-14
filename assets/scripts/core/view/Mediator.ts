@@ -1,13 +1,11 @@
 import { EventObject } from "../../project/event/EventObject";
 
-export class Mediator extends EventObject {
-    protected _fullPath: string;
-    get fullPath() {
-        return this._fullPath;
-    }
+export enum EMediatorType {
+    popup,
+    area,
+}
 
-    constructor(fullPath: string) {
-        super();
-        this._fullPath = fullPath;
-    }
+export abstract class Mediator extends EventObject {
+    type: EMediatorType;
+    fullPath: string = "";
 }

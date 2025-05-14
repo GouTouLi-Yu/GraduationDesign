@@ -1,10 +1,5 @@
 export class ClassConfig {
-    private static _classMap: Map<string, any>;
-
-    static init() {
-        this._classMap = new Map<string, any>();
-    }
-
+    private static _classMap: Map<string, any> = new Map<string, any>();
     static destroy() {
         this._classMap.clear();
     }
