@@ -11,4 +11,8 @@ export class ClassConfig {
     static getClass(className: string) {
         return this._classMap.get(className);
     }
+
+    static deleteClass(className: string) {
+        this._classMap.delete(className);
+    }
 }

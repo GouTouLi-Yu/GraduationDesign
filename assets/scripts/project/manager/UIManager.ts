@@ -1,6 +1,7 @@
 import { Node } from "cc";
 import { EMediatorType, Mediator } from "../../core/view/Mediator";
 import { ClassConfig } from "../config/ClassConfig";
+import { Injector } from "../Injector/Injector";
 import { ResManager } from "./ResManager";
 import { SceneManager } from "./SceneManager";
 
@@ -17,7 +18,7 @@ export class UIManager {
         // 得到MainMenu
         let layerName = viewNameWithOutSuffix + "Layer";
         let mediatorName = viewNameWithOutSuffix + "Mediator";
-        let mediator: Mediator = ClassConfig.getClass(mediatorName);
+        let mediator = ClassConfig.getClass(mediatorName);
         if (!mediator) {
             console.error(`${mediatorName} not found in ClassConfig`);
             return;
@@ -32,6 +33,15 @@ export class UIManager {
                 parentNode = SceneManager.areaLayer;
             }
             parentNode.addChildCC(node);
+        }).then(() => {
+            let _mediator: Mediator = Injector.getInstance(mediatorName);
+            _mediator.initialize();
+            _mediator.onRegister();
+            _mediator.mapEventListeners();
+            _mediator.enterWithData(params);
+            return PromiseNode;
         });
     }
+
+    static removeView(viewName: string) {}
 }
