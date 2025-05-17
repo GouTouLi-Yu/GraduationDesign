@@ -6,6 +6,15 @@ import { ResManager } from "./ResManager";
 import { SceneManager } from "./SceneManager";
 
 export class UIManager {
+    static areaViewOpenedMap: Map<string, Mediator>;
+    static popupViewOpenedMap: Map<string, Mediator>;
+    static openNingView: string = null;
+
+    static init() {
+        this.areaViewOpenedMap = new Map();
+        this.popupViewOpenedMap = new Map();
+    }
+
     /** 跳转场景 */
     /**
      * @description 跳转界面
@@ -33,11 +42,12 @@ export class UIManager {
                 parentNode = SceneManager.areaLayer;
             }
             parentNode.addChildCC(node);
-        }).then(() => {
+            return node;
+        }).then((node: Node) => {
             let _mediator: Mediator = Injector.getInstance(mediatorName);
+            _mediator.view = node;
             _mediator.initialize();
             _mediator.onRegister();
-            _mediator.mapEventListeners();
             _mediator.enterWithData(params);
             return PromiseNode;
         });

@@ -11,6 +11,7 @@ export class Main extends Component {
     }
 
     private initStaticClass() {
+        UIManager.init();
         Injector.init();
     }
 

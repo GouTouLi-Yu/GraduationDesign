@@ -1,4 +1,4 @@
-import { Node } from "cc";
+import { EventTouch, Node, NodeEventType, Vec2 } from "cc";
 
 declare module "cc" {
     interface Node {
@@ -9,6 +9,9 @@ declare module "cc" {
         setLocalZOrder(zorder: number);
         setTag(tag: string | number);
         _tag: string | number;
+        addClickListener(callback, noCheckGuide?: boolean, checkMove?: boolean);
+        _clickList: any[];
+        removeTouchListener();
     }
 }
 
@@ -55,5 +58,49 @@ Node.prototype.addChildCC = function (
     child.setLocalZOrder(zOrder);
     if (tag !== undefined) {
         child.setTag(tag);
+    }
+};
+
+Node.prototype.addClickListener = function (callback: Function) {
+    if (this._clickList == null) {
+        this._clickList = [];
+        this.on(NodeEventType.TOUCH_START, (event: EventTouch) => {
+            if (this._touchEnbale == false) {
+                event.preventSwallow = true;
+                return;
+            }
+        });
+        this.on(NodeEventType.TOUCH_END, (event: EventTouch) => {
+            if (this._touchEnbale == false) {
+                event.preventSwallow = true;
+                return;
+            }
+            if (event.target != this) return;
+            this._clickList?.forEach((clickInfo) => {
+                var _callback = clickInfo.callback;
+                if (
+                    Vec2.squaredDistance(
+                        event.getUILocation(),
+                        event.getUIStartLocation()
+                    ) > 100
+                ) {
+                    return;
+                }
+                _callback(event.currentTarget, NodeEventType.TOUCH_END);
+            });
+        });
+    }
+    var clickInfo: any = {
+        callback: callback,
+    };
+    this._clickList.push(clickInfo);
+};
+
+Node.prototype.removeTouchListener = function () {
+    if (this._clickList) {
+        this._clickList.splice(0);
+    }
+    if (this._touchList) {
+        this._touchList.splice(0);
     }
 };
