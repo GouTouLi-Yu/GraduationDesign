@@ -34,7 +34,13 @@ export class Injector {
         this.classMap.clear();
     }
 
-    static delete<T extends new (...args: any) => any>(classType: T) {
+    static delete<T extends new (...args: any) => any>(classType: T | string) {
         this.classMap.delete(classType);
+    }
+
+    static hasClass<T extends new (...args: any) => any>(
+        classType: T | string
+    ) {
+        return this.classMap.has(classType);
     }
 }

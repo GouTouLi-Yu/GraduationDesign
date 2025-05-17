@@ -27,7 +27,7 @@ export class UIManager {
         // 得到MainMenu
         let layerName = viewNameWithOutSuffix + "Layer";
         let mediatorName = viewNameWithOutSuffix + "Mediator";
-        let mediator = ClassConfig.getClass(mediatorName);
+        let mediator: Mediator = ClassConfig.getClass(mediatorName);
         if (!mediator) {
             console.error(`${mediatorName} not found in ClassConfig`);
             return;
@@ -35,6 +35,8 @@ export class UIManager {
         let layerPath = mediator.fullPath + layerName;
         let PromiseNode: Promise<Node> = ResManager.loadPrefab(layerPath);
         let parentNode: Node;
+        // 实例化对象
+        mediator = Injector.getInstance(mediatorName);
         PromiseNode.then((node: Node) => {
             if (mediator.type == EMediatorType.popup) {
                 parentNode = SceneManager.popupLayer;
@@ -43,14 +45,24 @@ export class UIManager {
             }
             parentNode.addChildCC(node);
             return node;
-        }).then((node: Node) => {
-            let _mediator: Mediator = Injector.getInstance(mediatorName);
-            _mediator.view = node;
-            _mediator.initialize();
-            _mediator.onRegister();
-            _mediator.enterWithData(params);
-            return PromiseNode;
-        });
+        })
+            .then((node: Node) => {
+                mediator.view = node;
+                mediator.initialize();
+                mediator.onRegister();
+                mediator.enterWithData(params);
+                return PromiseNode;
+            })
+            .then(() => {
+                if (mediator.type == EMediatorType.popup) {
+                    this.popupViewOpenedMap.set(viewName, mediator);
+                } else {
+                    for (let mediator of this.areaViewOpenedMap.values()) {
+                        mediator.dispose();
+                    }
+                    this.areaViewOpenedMap.set(viewName, mediator);
+                }
+            });
     }
 
     static removeView(viewName: string) {}

@@ -1,19 +1,23 @@
 import { Node } from "cc";
 import { ClassConfig } from "../../../project/config/ClassConfig";
-import { PopupMediator } from "../PopupMediator";
+import { UIManager } from "../../../project/manager/UIManager";
+import { AreaMediator } from "../AreaMediator";
+import { EMediatorDisposeType } from "../Mediator";
 
-export class MainMenuMediator extends PopupMediator {
+export class MainMenuMediator extends AreaMediator {
     static fullPath: string = "prefab/mainMenu/";
     private _layout: Node;
+    disposeType = EMediatorDisposeType.immediate;
 
     initialize(): void {
         super.initialize();
-        console.log("成功");
+        console.log("初始化");
     }
 
     onRegister(): void {
         super.onRegister();
         this.registerUI();
+        console.log("注册");
     }
 
     registerUI(): void {
@@ -22,9 +26,17 @@ export class MainMenuMediator extends PopupMediator {
 
     enterWithData(data?: any): void {
         super.enterWithData(data);
-        console.log("当前节点：", this.view);
-        this._layout.getChildByName("newBtn").addClickListener(() => {
-            console.log("点击新游戏");
+        this.setupView();
+    }
+
+    setupView() {
+        this.setNewGameBtn();
+    }
+
+    setNewGameBtn() {
+        let btn = this._layout.getChildByName("newBtn");
+        btn.addClickListener(() => {
+            UIManager.gotoView("TransmitView");
         });
     }
 }

@@ -1,5 +1,6 @@
 import { _decorator, Component, DynamicAtlasManager } from "cc";
 import { Injector } from "./project/Injector/Injector";
+import { EventManager } from "./project/manager/EventManager";
 import { UIManager } from "./project/manager/UIManager";
 const { ccclass, property } = _decorator;
 
@@ -13,6 +14,7 @@ export class Main extends Component {
     private initStaticClass() {
         UIManager.init();
         Injector.init();
+        EventManager.init();
     }
 
     start() {
