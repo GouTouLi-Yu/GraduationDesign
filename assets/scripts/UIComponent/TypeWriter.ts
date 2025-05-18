@@ -1,4 +1,6 @@
 import { _decorator, Component, RichText } from "cc";
+import { PCEventType } from "../project/event/EventType";
+import { EventManager } from "../project/manager/EventManager";
 const { ccclass, property } = _decorator;
 
 @ccclass("TypewriterEffect")
@@ -69,6 +71,7 @@ export class TypewriterEffect extends Component {
         // 检查是否所有文本都已显示
         if (this.charIndex >= this.fullText.length) {
             this.isPlaying = false;
+            EventManager.dispatchEvent(PCEventType.EVT_TYPE_WRITER_END, this);
         }
     }
 

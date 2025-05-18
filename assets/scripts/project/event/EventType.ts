@@ -1,5 +1,5 @@
 export class EventType {
-    constructor(parameters) {}
+    constructor(parameters) { }
     private static _eventNum: number = 10000;
     private static _eventTypeMap = {};
 
