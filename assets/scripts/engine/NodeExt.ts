@@ -2,7 +2,7 @@ import { EventTouch, Node, NodeEventType, Vec2 } from "cc";
 
 declare module "cc" {
     interface Node {
-        // [x: string]: any;
+        [x: string]: any;
         clone(): Node;
         addChildCC(child: Node, zOrder?: number, tag?: string | number);
         _zOrder: number | null;

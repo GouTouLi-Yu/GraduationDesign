@@ -34,10 +34,10 @@ export abstract class Mediator extends EventObject {
     }
 
     _dipose() {
+        super.dispose();
         this.view.destroy();
         this.view = null;
         this.removeAllListeners();
         Injector.delete(typeof this);
-        this.dispatchEvent("eventA");
     }
 }

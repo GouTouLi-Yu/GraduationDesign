@@ -1,19 +1,14 @@
-import { Injector } from "../Injector/Injector";
+import { DisposableObject } from "../disposableObject/DisposableObject";
 import { EventManager } from "../manager/EventManager";
 
-export class EventObject {
-    /** 是否有效 */
-    isValid(): boolean {
-        return Injector.hasClass(typeof this);
-    }
-
+export class EventObject extends DisposableObject {
     removeAllListeners() {}
 
-    dispatchEvent(event: string, args?: any) {
+    dispatchEvent(event: number, args?: any) {
         EventManager.dispatchEvent(event, args);
     }
 
-    mapEventListener(event: string, target: any, callback: Function) {
+    mapEventListener(event: number, target: any, callback: Function) {
         EventManager.addEventListener(event, target, callback.bind(target));
     }
 }

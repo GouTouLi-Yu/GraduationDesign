@@ -1,5 +1,6 @@
 import { Node } from "cc";
 import { ClassConfig } from "../../../project/config/ClassConfig";
+import { PCEventType } from "../../../project/event/EventType";
 import { UIManager } from "../../../project/manager/UIManager";
 import { AreaMediator } from "../AreaMediator";
 import { EMediatorDisposeType } from "../Mediator";
@@ -38,6 +39,11 @@ export class MainMenuMediator extends AreaMediator {
         btn.addClickListener(() => {
             UIManager.gotoView("TransmitView");
         });
+    }
+
+    dispose(): void {
+        super.dispose();
+        this.dispatchEvent(PCEventType.EVT_MAIN_MENU_START_GAME);
     }
 }
 ClassConfig.addClass("MainMenuMediator", MainMenuMediator);
