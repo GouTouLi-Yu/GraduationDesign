@@ -40,6 +40,11 @@ export class TypewriterEffect extends Component {
         this.tagStack = [];
     }
 
+    updateText(text: string) {
+        this.fullText = text;
+        this.startEffect();
+    }
+
     update(dt: number) {
         if (!this.isPlaying || this.charIndex >= this.fullText.length) return;
 
