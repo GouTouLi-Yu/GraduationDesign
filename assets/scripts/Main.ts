@@ -2,6 +2,7 @@ import { _decorator, Component, DynamicAtlasManager } from "cc";
 
 import { Injector } from "./project/Injector/Injector";
 import { EventManager } from "./project/manager/EventManager";
+import { ResManager } from "./project/manager/ResManager";
 import { UIManager } from "./project/manager/UIManager";
 const { ccclass, property } = _decorator;
 DynamicAtlasManager.instance.enabled = false;
@@ -11,6 +12,12 @@ export class Main extends Component {
         this.initStaticClass();
     }
 
+    private initConfig(): Promise<void> {
+        return ResManager.loadConfig("config").then((jsonArr) => {
+            jsonArr.forEach((json) => {});
+        });
+    }
+
     private initStaticClass() {
         UIManager.init();
         Injector.init();
@@ -18,7 +25,9 @@ export class Main extends Component {
     }
 
     start() {
-        UIManager.gotoView("MainMenuView");
+        this.initConfig().then(() => {
+            UIManager.gotoView("MainMenuView");
+        });
     }
 
     update(deltaTime: number) {}

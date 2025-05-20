@@ -1,4 +1,12 @@
-import { instantiate, Node, Prefab, resources, Sprite, SpriteFrame } from "cc";
+import {
+    instantiate,
+    JsonAsset,
+    Node,
+    Prefab,
+    resources,
+    Sprite,
+    SpriteFrame,
+} from "cc";
 
 export class ResManager {
     static loadPrefab(path: string): Promise<Node> {
@@ -35,6 +43,26 @@ export class ResManager {
                 return;
             }
             sprite.spriteFrame = sf;
+        });
+    }
+
+    static loadConfig(path: string): Promise<Array<JsonAsset>> {
+        if (!path) {
+            console.error("path is null or undefined");
+            return Promise.reject("path is null or undefined");
+        }
+        return new Promise<Array<JsonAsset>>((resolve, reject) => {
+            resources.loadDir(
+                path,
+                Array<JsonAsset>,
+                (err: Error, jsonArr: Array<JsonAsset>) => {
+                    if (err) {
+                        reject(err);
+                        return;
+                    }
+                    resolve(jsonArr);
+                }
+            );
         });
     }
 }
