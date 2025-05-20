@@ -98,6 +98,7 @@ export class TypewriterEffect extends Component {
     skipToEnd() {
         this.isPlaying = false;
         this.richText.string = this.fullText;
+        EventManager.dispatchEvent(PCEventType.EVT_TYPE_WRITER_END, this);
     }
 
     // 重新播放效果

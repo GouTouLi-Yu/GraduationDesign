@@ -11,6 +11,8 @@ export class TransmitMediator extends AreaMediator {
     private _textNode: Node;
     private _typeWriter: TypewriterEffect;
     private _richTextNode: Node;
+    private _chatEndNode: Node;
+    private _textBgNode: Node;
     initialize() {
         super.initialize();
     }
@@ -23,12 +25,14 @@ export class TransmitMediator extends AreaMediator {
     registerUI() {
         this._buddleNode = this.view.getChildByName("buddle");
         this._textNode = this.view.getChildByName("chatText");
+        this._textBgNode = this._textNode.getChildByName("textBg");
         this._richTextNode = this._textNode.getChildByName("RichText");
+        this._chatEndNode = this._textNode.getChildByName("chatEnd");
         this._typeWriter = this._richTextNode.getComponent(TypewriterEffect);
     }
     mapEventListeners() {
         this.mapEventListener(PCEventType.EVT_TYPE_WRITER_END, this, () => {
-            console.log("555");
+            this._chatEndNode.active = true;
         })
     }
 
@@ -39,7 +43,17 @@ export class TransmitMediator extends AreaMediator {
 
     setupView() {
         this.setBuddleNode();
+        this.setTextBg();
+    }
+    setTextBg() {
+        this._textBgNode.addClickListener(() => {
+            this._typeWriter.skipToEnd();
+        })
+    }
+    setChatEnd() {
+        this._chatEndNode.addClickListener(() => {//点击跳转下一条文本
 
+        })
     }
     setRichText() {
         let richText = this._richTextNode.getComponent(RichText);
@@ -47,6 +61,7 @@ export class TransmitMediator extends AreaMediator {
     setBuddleNode() {
         this._buddleNode.addClickListener(() => {
             this._textNode.active = true;
+            this._buddleNode.active = false;
         })
     }
 
