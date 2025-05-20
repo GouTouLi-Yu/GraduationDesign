@@ -71,7 +71,7 @@ export class TypewriterEffect extends Component {
         // 检查是否所有文本都已显示
         if (this.charIndex >= this.fullText.length) {
             this.isPlaying = false;
-            EventManager.dispatchEvent(PCEventType.EVT_TYPE_WRITER_END, this);
+            EventManager.dispatchEvent(PCEventType.EVT_TYPE_WRITER_END);
         }
     }
 
@@ -98,7 +98,7 @@ export class TypewriterEffect extends Component {
     skipToEnd() {
         this.isPlaying = false;
         this.richText.string = this.fullText;
-        EventManager.dispatchEvent(PCEventType.EVT_TYPE_WRITER_END, this);
+        EventManager.dispatchEvent(PCEventType.EVT_TYPE_WRITER_END);
     }
 
     // 重新播放效果
