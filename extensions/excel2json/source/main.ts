@@ -1,80 +1,100 @@
-// 必须使用这种导出结构
+import * as fs from "fs";
+import * as path from "path";
+import * as xlsx from "xlsx";
+
+// 将方法提取到外部对象
+const excelConverter = {
+    convertExcelToJson: function () {
+        try {
+            console.log("开始转换");
+            // 1. 修正路径转义问题
+            const excelDir =
+                "D:\\workAndStudy\\CocosCreator\\FormalProject\\res\\data"; // Excel文件目录
+            const outputDir = path.join(
+                Editor.Project.path,
+                "assets",
+                "resources",
+                "config"
+            ); // 输出目录
+
+            // 2. 检查输入目录是否存在
+            if (!fs.existsSync(excelDir)) {
+                throw new Error(`Excel目录不存在: ${excelDir}`);
+            }
+
+            // 3. 确保输出目录存在
+            if (!fs.existsSync(outputDir)) {
+                fs.mkdirSync(outputDir, { recursive: true });
+            }
+
+            // 4. 获取所有Excel文件
+            const files = fs
+                .readdirSync(excelDir)
+                .filter((file) => path.extname(file) === ".xlsx");
+
+            if (files.length === 0) {
+                Editor.Dialog.info(
+                    "提示：" + `在目录 ${excelDir} 中未找到.xlsx文件`
+                );
+                return;
+            }
+
+            // 5. 批量转换
+            let successCount = 0;
+            const failedFiles: string[] = [];
+
+            for (const file of files) {
+                try {
+                    const excelPath = path.join(excelDir, file);
+                    const jsonName = path.basename(file, ".xlsx") + ".json";
+                    const jsonPath = path.join(outputDir, jsonName);
+
+                    // 6. 读取并转换Excel
+                    const workbook = xlsx.readFile(excelPath);
+                    const sheetNames = workbook.SheetNames;
+
+                    if (sheetNames.length === 0) {
+                        failedFiles.push(`${file} (无工作表)`);
+                        continue;
+                    }
+
+                    const data = xlsx.utils.sheet_to_json(
+                        workbook.Sheets[sheetNames[0]]
+                    );
+                    fs.writeFileSync(jsonPath, JSON.stringify(data, null, 2));
+                    successCount++;
+
+                    console.log(`[成功] ${file} -> ${jsonName}`);
+                } catch (error: any) {
+                    failedFiles.push(`${file} (${error.message})`);
+                    console.error(`[失败] ${file}:`, error);
+                }
+            }
+
+            // 7. 生成结果报告
+            let report = `转换完成！\n\n成功: ${successCount}个\n失败: ${failedFiles.length}个`;
+
+            if (failedFiles.length > 0) {
+                report += `\n\n失败文件列表:\n${failedFiles.join("\n")}`;
+            }
+
+            // 8. 显示结果
+            Editor.Dialog.info("转换结果" + report);
+        } catch (error: any) {
+            console.error("全局错误:", error);
+            Editor.Dialog.error("转换出错", error.message);
+        }
+    },
+};
 
 export const methods = {
     excute: async function () {
         console.log("执行");
+        // 直接调用外部对象的方法
+        excelConverter.convertExcelToJson();
+        console.log("导出成功");
         return true;
     },
-
-    // async convertExcelToJson() {
-    //     try {
-    //         // 1. 使用 Cocos Creator 的对话框选择目录
-    //         const result = await Editor.Dialog.select({
-    //             title: "选择Excel目录",
-    //             defaultPath: "D:\\config",
-    //             properties: ["openDirectory"],
-    //         });
-
-    //         if (result.canceled || !result.filePaths[0]) {
-    //             console.log("用户取消选择");
-    //             return;
-    //         }
-
-    //         const excelDir = result.filePaths[0];
-    //         const outputDir = path.join(
-    //             Editor.Project.path,
-    //             "assets",
-    //             "resources",
-    //             "config"
-    //         );
-
-    //         // 2. 确保输出目录存在
-    //         if (!fs.existsSync(outputDir)) {
-    //             fs.mkdirSync(outputDir, { recursive: true });
-    //         }
-
-    //         // 3. 处理所有Excel文件
-    //         const files = fs.readdirSync(excelDir);
-    //         let count = 0;
-
-    //         for (const file of files) {
-    //             if (path.extname(file) === ".xlsx") {
-    //                 const excelPath = path.join(excelDir, file);
-    //                 const jsonName = path.basename(file, ".xlsx") + ".json";
-    //                 const jsonPath = path.join(outputDir, jsonName);
-
-    //                 // 4. 读取Excel并转换为JSON
-    //                 const workbook = xlsx.readFile(excelPath);
-    //                 const sheetNames = workbook.SheetNames;
-    //                 const data = xlsx.utils.sheet_to_json(
-    //                     workbook.Sheets[sheetNames[0]]
-    //                 );
-
-    //                 // 5. 保存JSON文件
-    //                 fs.writeFileSync(jsonPath, JSON.stringify(data, null, 2));
-    //                 count++;
-    //                 console.log(`已转换: ${file} -> ${jsonName}`);
-
-    //                 // 更新进度
-    //                 await Editor.Message.request(
-    //                     "excel2json",
-    //                     "update-progress",
-    //                     {
-    //                         current: count,
-    //                         total: files.length,
-    //                         filename: file,
-    //                     }
-    //                 );
-    //             }
-    //         }
-
-    //         // 6. 显示完成提示
-    //         Editor.Dialog.info("转换完成", `成功转换 ${count} 个Excel文件`);
-    //     } catch (error) {
-    //         console.error("转换出错:", error);
-    //         Editor.Dialog.error("转换出错", error.message);
-    //     }
-    // },
 };
 
 // 必须导出的生命周期函数
