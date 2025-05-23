@@ -1,45 +1,146 @@
+"use strict";
 import * as fs from "fs";
 import * as path from "path";
 import * as xlsx from "xlsx";
 
-// 将方法提取到外部对象
-const excelConverter = {
-    convertExcelToJson: function () {
+interface ExcelConverter {
+    parseValue(value: any, type: string): any;
+    convertSheetToTypedJson(sheet: any): any[];
+    convertExcelToJson(): void;
+    cleanDirectory(dir: string, ext: string): void;
+}
+
+const excelConverter: ExcelConverter = {
+    cleanDirectory(dir: string, ext: string): void {
+        if (!fs.existsSync(dir)) return;
+
+        const files = fs.readdirSync(dir);
+        files.forEach((file) => {
+            if (file.endsWith(ext)) {
+                const filePath = path.join(dir, file);
+                fs.unlinkSync(filePath); // 删除文件
+                console.log(`[Clean] Deleted: ${filePath}`);
+            }
+        });
+    },
+
+    parseValue(value: any, type: string): any {
+        if (value === undefined || value === null || value === "") {
+            return null;
+        }
+
+        // Handle array types
+        if (type.endsWith("[]")) {
+            if (typeof value !== "string") return [];
+
+            const elementType = type.replace("[]", "");
+            const trimmedValue = value.trim();
+
+            if (trimmedValue === "[]" || trimmedValue === "") return [];
+
+            try {
+                // Try to parse as JSON array
+                const parsed = JSON.parse(trimmedValue);
+                if (Array.isArray(parsed)) {
+                    return parsed.map((item) =>
+                        this.parseValue(item, elementType)
+                    );
+                }
+                return [this.parseValue(parsed, elementType)];
+            } catch (e) {
+                // Fallback to comma-separated values
+                const items = trimmedValue.split(",").map((s) => s.trim());
+                return items.map((item) => this.parseValue(item, elementType));
+            }
+        }
+
+        // Handle basic types
+        switch (type) {
+            case "int":
+            case "number":
+                return Number(value);
+            case "string":
+                return String(value);
+            case "json":
+                try {
+                    return typeof value === "string"
+                        ? JSON.parse(value)
+                        : value;
+                } catch (e) {
+                    console.warn(`Failed to parse JSON: ${value}`);
+                    return null;
+                }
+            default:
+                return value;
+        }
+    },
+
+    convertSheetToTypedJson(sheet: any): any[] {
+        const excelData = xlsx.utils.sheet_to_json(sheet, { header: 1 });
+
+        if (excelData.length < 3) return [];
+
+        const typeDefs: any = excelData[0]; // 第一行：数据类型（string/number/json/json[]/number[]）
+        const fieldNames: any = excelData[1]; // 第二行：字段名（Id/type/jsonA/jsonArr/numberArr）
+        const result = [];
+
+        // 从第三行开始解析数据
+        for (let i = 2; i < excelData.length; i++) {
+            const row: any = excelData[i];
+            const obj: any = {};
+
+            for (let j = 0; j < fieldNames.length; j++) {
+                const fieldName = fieldNames[j];
+                if (!fieldName) continue;
+
+                const fieldType = typeDefs[j] || "string";
+                const rawValue = row[j];
+
+                obj[fieldName] = this.parseValue(rawValue, fieldType);
+            }
+
+            result.push(obj);
+        }
+
+        return result;
+    },
+
+    convertExcelToJson(): void {
         try {
-            console.log("开始转换");
-            // 1. 修正路径转义问题
+            console.log("[ExcelConverter] Starting conversion");
+
             const excelDir =
-                "D:\\workAndStudy\\CocosCreator\\FormalProject\\res\\data"; // Excel文件目录
+                "D:\\workAndStudy\\CocosCreator\\FormalProject\\res\\data";
             const outputDir = path.join(
                 Editor.Project.path,
                 "assets",
                 "resources",
                 "config"
-            ); // 输出目录
+            );
 
-            // 2. 检查输入目录是否存在
             if (!fs.existsSync(excelDir)) {
-                throw new Error(`Excel目录不存在: ${excelDir}`);
+                fs.mkdirSync(excelDir, { recursive: true });
+                Editor.Dialog.info(`Created excel directory: ${excelDir}`);
+                return;
             }
 
-            // 3. 确保输出目录存在
             if (!fs.existsSync(outputDir)) {
                 fs.mkdirSync(outputDir, { recursive: true });
             }
 
-            // 4. 获取所有Excel文件
+            this.cleanDirectory(outputDir, ".json");
+
             const files = fs
                 .readdirSync(excelDir)
-                .filter((file) => path.extname(file) === ".xlsx");
+                .filter((file) => path.extname(file).toLowerCase() === ".xlsx");
 
             if (files.length === 0) {
                 Editor.Dialog.info(
-                    "提示：" + `在目录 ${excelDir} 中未找到.xlsx文件`
+                    "[ExcelConverter] No .xlsx files found in: " + excelDir
                 );
                 return;
             }
 
-            // 5. 批量转换
             let successCount = 0;
             const failedFiles: string[] = [];
 
@@ -49,54 +150,49 @@ const excelConverter = {
                     const jsonName = path.basename(file, ".xlsx") + ".json";
                     const jsonPath = path.join(outputDir, jsonName);
 
-                    // 6. 读取并转换Excel
                     const workbook = xlsx.readFile(excelPath);
                     const sheetNames = workbook.SheetNames;
 
                     if (sheetNames.length === 0) {
-                        failedFiles.push(`${file} (无工作表)`);
+                        failedFiles.push(`${file} (no worksheets)`);
                         continue;
                     }
 
-                    const data = xlsx.utils.sheet_to_json(
+                    const data = this.convertSheetToTypedJson(
                         workbook.Sheets[sheetNames[0]]
                     );
                     fs.writeFileSync(jsonPath, JSON.stringify(data, null, 2));
                     successCount++;
 
-                    console.log(`[成功] ${file} -> ${jsonName}`);
+                    console.log(
+                        `[ExcelConverter] Success: ${file} -> ${jsonName}`
+                    );
                 } catch (error: any) {
                     failedFiles.push(`${file} (${error.message})`);
-                    console.error(`[失败] ${file}:`, error);
+                    console.error(`[ExcelConverter] Failed: ${file}`, error);
                 }
             }
 
-            // 7. 生成结果报告
-            let report = `转换完成！\n\n成功: ${successCount}个\n失败: ${failedFiles.length}个`;
-
+            let report = `[ExcelConverter] Conversion complete!\n\nSuccess: ${successCount}\nFailed: ${failedFiles.length}`;
             if (failedFiles.length > 0) {
-                report += `\n\n失败文件列表:\n${failedFiles.join("\n")}`;
+                report += `\n\nFailed files:\n${failedFiles.join("\n")}`;
             }
 
-            // 8. 显示结果
-            Editor.Dialog.info("转换结果" + report);
+            Editor.Dialog.info(report);
         } catch (error: any) {
-            console.error("全局错误:", error);
-            Editor.Dialog.error("转换出错", error.message);
+            console.error("[ExcelConverter] Global error:", error);
+            Editor.Dialog.error("[ExcelConverter] Error", error.message);
         }
     },
 };
 
 export const methods = {
-    excute: async function () {
-        console.log("执行");
-        // 直接调用外部对象的方法
+    execute: async function () {
+        console.log("[ExcelConverter] Executing...");
         excelConverter.convertExcelToJson();
-        console.log("导出成功");
         return true;
     },
 };
 
-// 必须导出的生命周期函数
 export function load() {}
 export function unload() {}

@@ -21,7 +21,7 @@
         "messages": {
             "excel2json:excel2json": {
                 "methods": [
-                    "excute"
+                    "execute"
                 ]
             }
         },
