@@ -243,13 +243,15 @@ const excelConverter: ExcelConverter = {
 
             this.cleanDirectory(outputDir, ".json");
 
-            const files = fs
-                .readdirSync(excelDir)
-                .filter(
-                    (file) =>
-                        path.extname(file).toLowerCase() === ".xlsx" &&
-                        !file.startsWith("~")
-                );
+            const files = fs.readdirSync(excelDir).filter((file) => {
+                const ext = path.extname(file).toLowerCase();
+                const isXlsx = ext === ".xlsx";
+                const isTempFile =
+                    file.startsWith("~$") || file.startsWith("~"); // 匹配两种临时文件格式
+
+                // 只保留.xlsx且不是临时文件
+                return isXlsx && !isTempFile;
+            });
 
             if (files.length === 0) {
                 Editor.Dialog.info(
