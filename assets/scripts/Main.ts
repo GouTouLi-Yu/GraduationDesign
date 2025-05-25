@@ -1,8 +1,9 @@
 import { _decorator, Component, DynamicAtlasManager } from "cc";
 
+import { ConfigReader } from "./project/ConfigReader/ConfigReader";
 import { Injector } from "./project/Injector/Injector";
 import { EventManager } from "./project/manager/EventManager";
-import { ResManager } from "./project/manager/ResManager";
+import { MyResManager } from "./project/manager/ResManager";
 import { UIManager } from "./project/manager/UIManager";
 const { ccclass, property } = _decorator;
 DynamicAtlasManager.instance.enabled = false;
@@ -12,21 +13,20 @@ export class Main extends Component {
         this.initStaticClass();
     }
 
-    private initConfig(): Promise<void> {
-        return ResManager.loadConfig("config").then((jsonArr) => {
-            jsonArr.forEach((json) => {});
-        });
-    }
-
     private initStaticClass() {
+        MyResManager.init();
         UIManager.init();
         Injector.init();
         EventManager.init();
+        ConfigReader.init();
     }
 
     start() {
-        this.initConfig().then(() => {
+        ConfigReader.initConfig().then(() => {
             UIManager.gotoView("MainMenuView");
+
+            let allKeys = ConfigReader.getAllId("TransmitLevelConfig");
+            console.log("allKeys: ", allKeys);
         });
     }
 
