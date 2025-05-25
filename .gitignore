@@ -8,6 +8,7 @@ local/
 build/
 profiles/
 native
+**/extensions/
 #//////////////////////////
 # NPM
 #//////////////////////////
@@ -24,6 +25,7 @@ node_modules/
 .idea/
 assets/**/*.js
 assets/**/*.js.map      # SourceMap 文件
+assets/resources/config
 /node_modules/
 /release/                # 打包后的发布目录
 *.apk
