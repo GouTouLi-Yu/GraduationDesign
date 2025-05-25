@@ -141,6 +141,7 @@ const excelConverter: ExcelConverter = {
             }
         }
 
+        //
         // Handle basic types
         switch (type) {
             case "int":
@@ -219,8 +220,10 @@ const excelConverter: ExcelConverter = {
         try {
             console.log("[ExcelConverter] Starting conversion");
 
-            const excelDir =
-                "D:\\workAndStudy\\CocosCreator\\FormalProject\\res\\data";
+            // 获取项目根目录的上一级目录
+            const projectParentDir = path.dirname(Editor.Project.path);
+            // 设置Excel目录为上一级目录的res/data
+            const excelDir = path.join(projectParentDir, "res", "data");
             const outputDir = path.join(
                 Editor.Project.path,
                 "assets",
@@ -242,7 +245,11 @@ const excelConverter: ExcelConverter = {
 
             const files = fs
                 .readdirSync(excelDir)
-                .filter((file) => path.extname(file).toLowerCase() === ".xlsx");
+                .filter(
+                    (file) =>
+                        path.extname(file).toLowerCase() === ".xlsx" &&
+                        !file.startsWith("~")
+                );
 
             if (files.length === 0) {
                 Editor.Dialog.info(
