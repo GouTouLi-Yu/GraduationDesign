@@ -2,7 +2,7 @@ import { Node } from "cc";
 import { EMediatorType, Mediator } from "../../core/view/Mediator";
 import { ClassConfig } from "../config/ClassConfig";
 import { Injector } from "../Injector/Injector";
-import { ResManager } from "./ResManager";
+import { MyResManager } from "./ResManager";
 import { SceneManager } from "./SceneManager";
 
 export class UIManager {
@@ -33,7 +33,7 @@ export class UIManager {
             return;
         }
         let layerPath = mediator.fullPath + layerName;
-        let PromiseNode: Promise<Node> = ResManager.loadPrefab(layerPath);
+        let PromiseNode: Promise<Node> = MyResManager.loadPrefab(layerPath);
         let parentNode: Node;
         // 实例化对象
         mediator = Injector.getInstance(mediatorName);

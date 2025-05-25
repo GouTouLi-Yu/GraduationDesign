@@ -1,4 +1,5 @@
 import { _decorator } from "cc";
+import { MyResManager } from "../manager/ResManager";
 const { ccclass, property } = _decorator;
 
 @ccclass("DisposableObject")
@@ -14,5 +15,6 @@ export class DisposableObject {
             return;
         }
         this._isValid = false;
+        MyResManager.clearAllAssets();
     }
 }
