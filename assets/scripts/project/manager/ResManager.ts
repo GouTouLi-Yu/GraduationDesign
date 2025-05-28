@@ -11,7 +11,7 @@ import {
     Sprite,
     SpriteFrame,
 } from "cc";
-import { Debug } from "../dbug/Debug";
+import { Debug } from "../debug/Debug";
 
 export class MyResManager {
     private static _manualAssetMap: Map<string, Asset> = new Map<
