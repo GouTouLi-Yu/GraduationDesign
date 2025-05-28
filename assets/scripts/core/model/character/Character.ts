@@ -1,13 +1,26 @@
-import { _decorator } from 'cc';
-import { ClassConfig } from '../../../project/config/ClassConfig';
+import { _decorator } from "cc";
+import { ClassConfig } from "../../../project/config/ClassConfig";
 const { ccclass, property } = _decorator;
 
 export class Character {
-    private _attack: number;
-    private _defense: number;
-    private _hp: number;
-    private _remainHp: number;
+    protected _attack: number;
+    protected _defense: number;
+    protected _hp: number;
+    protected _remainHp: number;
 
+    syncData(data: any) {
+        if (data.attack != null) {
+            this._attack = data.attack;
+        }
+        if (data.defense != null) {
+            this._defense = data.defense;
+        }
+        if (data.hp != null) {
+            this._hp = data.hp;
+        }
+        if (data.remainHp != null) {
+            this._remainHp = data.remainHp;
+        }
+    }
 }
 ClassConfig.addClass("Character", Character);
-
