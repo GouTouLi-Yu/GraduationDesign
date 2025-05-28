@@ -1,5 +1,6 @@
 import {
     Asset,
+    AssetManager,
     error,
     instantiate,
     isValid,
@@ -9,8 +10,8 @@ import {
     resources,
     Sprite,
     SpriteFrame,
-    warn,
 } from "cc";
+import { Debug } from "../dbug/Debug";
 
 export class MyResManager {
     private static _manualAssetMap: Map<string, Asset> = new Map<
@@ -29,17 +30,63 @@ export class MyResManager {
      * 清除所有管理的资源（不包含持久化资源）
      */
     static clearAllAssets() {
+        Debug.printMemoryUsage(
+            "资源清理前，内存占用情况 -------------------------------------------------------------"
+        );
+        this._clearAllAssets();
+
+        setTimeout(() => {
+            Debug.printMemoryUsage(
+                "资源清理后，内存占用情况 -------------------------------------------------------------"
+            );
+        }, 100);
+    }
+
+    private static _clearAllAssets() {
         const assetCount = this._manualAssetMap.size;
         if (assetCount > 0) {
-            warn(`[ResManager] Clearing ${assetCount} assets`);
-
-            // 只清除非持久化资源
-            this._manualAssetMap.forEach((asset, key) => {
-                this.releaseAsset(key, asset);
+            // 创建副本避免迭代时修改集合的问题
+            const manualAssets = new Map(this._manualAssetMap);
+            manualAssets.forEach((asset, key) => {
+                try {
+                    this.releaseManualAsset(key, asset);
+                } catch (e) {
+                    console.error(`Error releasing manual asset ${key}:`, e);
+                }
             });
+
             this._manualAssetMap.clear();
         }
-        resources.releaseAll();
+        // 释放无引用的资源
+        const assets = AssetManager.instance.assets;
+        const toDestroy = [];
+        // 先收集需要销毁的资源
+        assets.forEach((asset, key) => {
+            if (asset.refCount <= 0) {
+                toDestroy.push({ key, asset });
+            }
+        });
+        // 然后统一销毁
+        toDestroy.forEach(({ key, asset }) => {
+            try {
+                console.log("haha");
+                asset.destroy();
+                // 如果destroy后需要从assets中移除
+                assets.remove(key);
+            } catch (e) {
+                console.error(`Error destroying asset ${key}:`, e);
+            }
+        });
+    }
+
+    static printAssetInfo() {
+        let assets = AssetManager.instance.assets;
+        assets.forEach((asset, key) => {
+            console.log("资源名 = ", asset.name);
+            console.log(asset.refCount);
+            console.log("------------------------------------");
+        });
+        console.log("assets", assets);
     }
 
     /**
@@ -62,7 +109,7 @@ export class MyResManager {
 
             const node = instantiate(prefab);
             if (!node) {
-                this.releaseAsset(path, prefab);
+                this.releaseManualAsset(path, prefab);
                 error(`[ResManager] Failed to instantiate prefab at ${path}`);
                 return null;
             }
@@ -115,7 +162,7 @@ export class MyResManager {
             if (oldSpriteFrame) {
                 const oldKey = this.findAssetKeyByValue(oldSpriteFrame);
                 if (oldKey) {
-                    this.releaseAsset(oldKey, oldSpriteFrame);
+                    this.releaseManualAsset(oldKey, oldSpriteFrame);
                 }
             }
         } catch (err) {
@@ -125,7 +172,7 @@ export class MyResManager {
     }
 
     // 新增辅助方法
-    private static releaseAsset(key: string, asset: Asset) {
+    private static releaseManualAsset(key: string, asset: Asset) {
         asset.decRef();
         if (asset.refCount <= 0) {
             asset.destroy();
