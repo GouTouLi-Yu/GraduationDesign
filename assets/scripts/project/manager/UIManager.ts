@@ -15,6 +15,8 @@ export class UIManager {
         this.popupViewOpenedMap = new Map();
     }
 
+    private static _isGoing: boolean = false;
+
     /** 跳转场景 */
     /**
      * @description 跳转界面
@@ -22,6 +24,10 @@ export class UIManager {
      * @param params
      */
     static gotoView(viewName: string, params?: any): Promise<Node> {
+        if (this._isGoing) {
+            return;
+        }
+        this._isGoing = true;
         // 传进来MainMenuView
         let viewNameWithOutSuffix = viewName.slice(0, -4);
         // 得到MainMenu
@@ -62,8 +68,10 @@ export class UIManager {
                     }
                     this.areaViewOpenedMap.set(viewName, mediator);
                 }
-            });
+            }).then(() => {
+                this._isGoing = false;
+            })
     }
 
-    static removeView(viewName: string) {}
+    static removeView(viewName: string) { }
 }
