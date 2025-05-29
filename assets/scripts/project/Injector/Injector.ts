@@ -17,9 +17,11 @@ export class Injector {
             // 如果传的是字符串, 从classConfig中获取类型, 然后调用构造函数
             if (typeof classType == "string") {
                 _class = new (ClassConfig.getClass(classType))();
+                _class.initialize?.();
             } else {
                 // 传的是构造函数 --> 直接调用构造函数
                 _class = new classType();
+                _class.initialize?.();
             }
             this.classMap.set(classType, _class);
         }

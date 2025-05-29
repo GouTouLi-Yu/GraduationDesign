@@ -4,11 +4,29 @@ export enum EItemType {
 }
 export class Item {
     private _id: string;
+    get id(): string {
+        return this._id;
+    }
     private _name: string;
+    get name(): string {
+        return this._name;
+    }
     private _desc: string;
+    get desc(): string {
+        return this._desc;
+    }
     private _buyPrice: number;
+    get buyPrice(): number {
+        return this._buyPrice;
+    }
     private _upgradePrice: number;
+    get upgradePrice(): number {
+        return this._upgradePrice;
+    }
     private _type: EItemType;
+    get type(): EItemType {
+        return this._type;
+    }
 
     syncData(config: any) {
         this._id = config.id;

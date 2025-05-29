@@ -54,7 +54,7 @@ export class UIManager {
         })
             .then((node: Node) => {
                 mediator.view = node;
-                mediator.initialize();
+                // mediator.initialize();
                 mediator.onRegister();
                 mediator.enterWithData(params);
                 return PromiseNode;
@@ -68,10 +68,11 @@ export class UIManager {
                     }
                     this.areaViewOpenedMap.set(viewName, mediator);
                 }
-            }).then(() => {
-                this._isGoing = false;
             })
+            .then(() => {
+                this._isGoing = false;
+            });
     }
 
-    static removeView(viewName: string) { }
+    static removeView(viewName: string) {}
 }

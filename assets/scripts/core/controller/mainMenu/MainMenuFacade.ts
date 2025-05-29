@@ -1,14 +1,39 @@
-import { _decorator, Component, Node } from 'cc';
-const { ccclass, property } = _decorator;
+import { ClassConfig } from "../../../project/config/ClassConfig";
+import { GameManager } from "../../../project/manager/GameManager";
+import { UIManager } from "../../../project/manager/UIManager";
+import { Player } from "../../model/player/Player";
+import { Facade } from "../Facade";
 
-@ccclass('MainMenuFacade')
-export class MainMenuFacade extends Component {
-    start() {
+export class MainMenuFacade extends Facade {
+    private _player: Player;
 
+    initialize() {
+        super.initialize();
+        this._player = Player.instance;
     }
 
-    update(deltaTime: number) {
-        
+    private syncPlayerData() {
+        let data = GameManager.getPlayerDataFromDisk();
+        this._player.syncData(data);
+    }
+
+    private syncDelPlayerData() {
+        GameManager.clearPlayerAllDataFromDisk();
+    }
+
+    enterGame() {
+        UIManager.gotoView("TransmitView");
+    }
+
+    opStartGame() {
+        this.syncPlayerData();
+        this.enterGame();
+    }
+
+    opStartNewGame() {
+        this.syncDelPlayerData();
+        this.syncPlayerData();
+        this.enterGame();
     }
 }
-
+ClassConfig.addClass("MainMenuFacade", MainMenuFacade);

@@ -2,6 +2,7 @@ import { _decorator, Label, Node, RichText } from "cc";
 import { ClassConfig } from "../../../project/config/ClassConfig";
 import { PCEventType } from "../../../project/event/EventType";
 import { TypewriterEffect } from "../../../UIComponent/TypeWriter";
+import { Player } from "../../model/player/Player";
 import { AreaMediator } from "../AreaMediator";
 const { ccclass, property } = _decorator;
 export enum EMapLevel {
@@ -10,9 +11,10 @@ export enum EMapLevel {
     boss,
     event,
     shop,
-    camp
+    camp,
 }
 export class TransmitMediator extends AreaMediator {
+    private _player: Player;
     static fullPath: string = "prefab/transmit/";
     private _buddleNode: Node;
     private _textNode: Node;
@@ -36,11 +38,12 @@ export class TransmitMediator extends AreaMediator {
         [EMapLevel.boss]: "boss",
         [EMapLevel.event]: "事件",
         [EMapLevel.shop]: "商店",
-        [EMapLevel.camp]: "营地"
+        [EMapLevel.camp]: "营地",
     };
     //********************************************************** */
     initialize() {
         super.initialize();
+        this._player = Player.instance;
         this.setText();
     }
 
@@ -64,7 +67,6 @@ export class TransmitMediator extends AreaMediator {
         this._portalRight = this.view.getChildByName("portalRight");
         this._portalleftText = this._portalLeft.getChildByName("Label");
         this._portalRightText = this._portalRight.getChildByName("Label");
-
     }
     mapEventListeners() {
         this.mapEventListener(PCEventType.EVT_TYPE_WRITER_END, this, () => {
@@ -74,6 +76,8 @@ export class TransmitMediator extends AreaMediator {
 
     enterWithData(data?: any) {
         super.enterWithData(data);
+        this._player.print();
+
         this.setupView();
     }
     setupView() {
@@ -83,18 +87,17 @@ export class TransmitMediator extends AreaMediator {
     }
 
     setupPortal() {
-        this._portalLeft.addClickListener(() => {
-
-        });
-
+        this._portalLeft.addClickListener(() => {});
     }
     showPortalText() {
-        this._portalleftText.getComponent(Label).string = this._levelNameMap[this._currentportal1];
-        this._portalRightText.getComponent(Label).string = this._levelNameMap[this._currentportal2];
+        this._portalleftText.getComponent(Label).string =
+            this._levelNameMap[this._currentportal1];
+        this._portalRightText.getComponent(Label).string =
+            this._levelNameMap[this._currentportal2];
     }
     setText() {
         this._Alice_text = [
-            '你好异世界的旅者，我是爱丽丝。',
+            "你好异世界的旅者，我是爱丽丝。",
             "欢迎来到我的世界，我是时间魔女，但是我迷失在了这里，你能帮助我回家吗？作为回报我会赐予你力量。",
             "感谢你，异世界的旅者，我将为你开启传送门，你将传送到不同的地点。",
             "如果你做好准备请触碰传送门吧，愿圣光永远照耀您。",
@@ -116,7 +119,6 @@ export class TransmitMediator extends AreaMediator {
                 return;
             }
             this._typeWriter.updateText(this._Alice_text[this._currentIndex]); //开始打字机
-
         });
     }
 

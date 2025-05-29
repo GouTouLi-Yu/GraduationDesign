@@ -69,7 +69,6 @@ export class MyResManager {
         // 然后统一销毁
         toDestroy.forEach(({ key, asset }) => {
             try {
-                console.log("haha");
                 asset.destroy();
                 // 如果destroy后需要从assets中移除
                 assets.remove(key);

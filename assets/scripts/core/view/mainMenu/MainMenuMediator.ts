@@ -1,7 +1,8 @@
 import { Node } from "cc";
 import { ClassConfig } from "../../../project/config/ClassConfig";
 import { PCEventType } from "../../../project/event/EventType";
-import { UIManager } from "../../../project/manager/UIManager";
+import { Injector } from "../../../project/Injector/Injector";
+import { MainMenuFacade } from "../../controller/mainMenu/MainMenuFacade";
 import { AreaMediator } from "../AreaMediator";
 import { EMediatorDisposeType } from "../Mediator";
 
@@ -9,9 +10,12 @@ export class MainMenuMediator extends AreaMediator {
     static fullPath: string = "prefab/mainMenu/";
     private _layout: Node;
     disposeType = EMediatorDisposeType.immediate;
+    private _facade: MainMenuFacade;
 
     initialize(): void {
         super.initialize();
+
+        this._facade = Injector.getInstance(MainMenuFacade);
         console.log("初始化");
     }
 
@@ -31,13 +35,23 @@ export class MainMenuMediator extends AreaMediator {
     }
 
     setupView() {
-        this.setNewGameBtn();
+        this.setStartNewGameBtn();
+        this.setStartGameBtn();
     }
 
-    setNewGameBtn() {
+    setStartNewGameBtn() {
         let btn = this._layout.getChildByName("newBtn");
         btn.addClickListener(() => {
-            UIManager.gotoView("TransmitView");
+            console.log("开始新游戏");
+            this._facade.opStartNewGame();
+        });
+    }
+
+    setStartGameBtn() {
+        let btn = this._layout.getChildByName("continueBtn");
+        btn.addClickListener(() => {
+            console.log("开始游戏");
+            this._facade.opStartGame();
         });
     }
 
