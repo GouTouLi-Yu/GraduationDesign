@@ -11,17 +11,17 @@ export class ConfigReader {
 
     static initConfig() {
         return new Promise<void>((resolve, reject) => {
-            console.log("开始加载配置文件");
             MyResManager.loadConfig("config").then((jsonArr) => {
                 jsonArr.forEach((json) => {
                     let _data = json.json;
                     let map = new Map<string, any>();
                     for (let i = 0; i < _data.length; i++) {
                         let data = _data[i];
-                        map.set(data.id, data);
+                        map.set(data.id, Object.freeze(data));
                     }
-                    this._configMap.set(json.name, map);
+                    this._configMap.set(json.name, Object.freeze(map));
                 });
+                this._configMap = Object.freeze(this._configMap);
                 resolve();
             });
         });
@@ -32,23 +32,25 @@ export class ConfigReader {
         if (!data) {
             return null;
         }
-        return this._configMap.get(tableName).get(id)[key];
+        return data[key];
     }
 
-    static getDataById(tableName: string, id: string) {
+    static getDataById(tableName: string, id: string): any {
         if (!this._configMap.has(tableName)) {
             console.error(`[ConfigReader] 未找到配置表: ${tableName}`);
             return null;
         }
-        if (!this._configMap.get(tableName).has(id)) {
+        const table = this._configMap.get(tableName);
+        if (!table.has(id)) {
             console.error(
                 `[ConfigReader] 未找到配置表: ${tableName} 的 id: ${id}`
             );
+            return null;
         }
-        return this._configMap.get(tableName).get(id);
+        return table.get(id);
     }
 
-    static getAllId(tableName: string) {
+    static getAllId(tableName: string): IterableIterator<string> {
         return this._configMap.get(tableName)?.keys();
     }
 }
