@@ -1,5 +1,3 @@
-import { ClassConfig } from "../../../project/config/ClassConfig";
-
 export enum EItemType {
     card = 1,
     treasure,
@@ -21,4 +19,3 @@ export class Item {
         this._type = config.type;
     }
 }
-ClassConfig.addClass("Item", Item);
