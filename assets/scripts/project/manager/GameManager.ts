@@ -1,5 +1,6 @@
 import { DataStore } from "../dataStore/DataStore";
 import { Player } from "./../../core/model/player/Player";
+import { UIManager } from "./UIManager";
 export interface IPlayerDataType {
     level?: number;
     gold?: number;
@@ -34,6 +35,7 @@ export class GameManager {
     private static _player: Player;
     static init() {
         Player.instance.initialize();
+        this._player = Player.instance;
     }
 
     static syncPlayerData(data: IPlayerDataType) {
@@ -85,37 +87,7 @@ export class GameManager {
         this.syncPlayerData(data);
     }
 
-    private static getItemIds(): Array<string> {
-        let itemIds: Array<string> = [];
-        let i = 0;
-        let itemKey = EGameDataType.itemIds + i;
-        while (DataStore.getStringData(itemKey) != null) {
-            itemIds.push(DataStore.getStringData(itemKey));
-            i++;
-            itemKey = EGameDataType.itemIds + i;
-        }
-        return itemIds;
-    }
-
-    /** 从磁盘获取数据 */
-    static getDataFromDisk(): IPlayerDataType {
-        const data: IPlayerDataType = {
-            level: DataStore.getNumData(EGameDataType.level),
-            gold: DataStore.getNumData(EGameDataType.gold),
-            energy: DataStore.getNumData(EGameDataType.energy),
-            itemIds: this.getItemIds(),
-            attack: DataStore.getNumData(EGameDataType.attack),
-            defense: DataStore.getNumData(EGameDataType.defense),
-            hp: DataStore.getNumData(EGameDataType.hp),
-            remainHp: DataStore.getNumData(EGameDataType.remainHp),
-            remainEnergy: DataStore.getNumData(EGameDataType.remainEnergy),
-            name: DataStore.getStringData(EGameDataType.name),
-            quest: DataStore.getNumData(EGameDataType.quest),
-        };
-        return data;
-    }
-
-    static syncDelData() {
+    static clearPlayerAllDataFromDisk() {
         DataStore.removeData(EGameDataType.level);
         DataStore.removeData(EGameDataType.gold);
         DataStore.removeData(EGameDataType.energy);
@@ -133,7 +105,41 @@ export class GameManager {
         DataStore.removeData(EGameDataType.remainEnergy);
         DataStore.removeData(EGameDataType.name);
         DataStore.removeData(EGameDataType.quest);
+
+        this._player.clearAll();
     }
 
-    static startGame() {}
+    static startGame() {
+        UIManager.gotoView("MainMenuView");
+    }
+
+    private static getItemIds(): Array<string> {
+        let itemIds: Array<string> = [];
+        let i = 0;
+        let itemKey = EGameDataType.itemIds + i;
+        while (DataStore.getStringData(itemKey) != null) {
+            itemIds.push(DataStore.getStringData(itemKey));
+            i++;
+            itemKey = EGameDataType.itemIds + i;
+        }
+        return itemIds;
+    }
+
+    /** 从磁盘获取玩家数据 */
+    static getPlayerDataFromDisk(): IPlayerDataType {
+        const data: IPlayerDataType = {
+            level: DataStore.getNumData(EGameDataType.level),
+            gold: DataStore.getNumData(EGameDataType.gold),
+            energy: DataStore.getNumData(EGameDataType.energy),
+            itemIds: this.getItemIds(),
+            attack: DataStore.getNumData(EGameDataType.attack),
+            defense: DataStore.getNumData(EGameDataType.defense),
+            hp: DataStore.getNumData(EGameDataType.hp),
+            remainHp: DataStore.getNumData(EGameDataType.remainHp),
+            remainEnergy: DataStore.getNumData(EGameDataType.remainEnergy),
+            name: DataStore.getStringData(EGameDataType.name),
+            quest: DataStore.getNumData(EGameDataType.quest),
+        };
+        return data;
+    }
 }
