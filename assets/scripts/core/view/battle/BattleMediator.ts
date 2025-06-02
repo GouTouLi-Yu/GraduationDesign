@@ -34,6 +34,12 @@ export class BattleMediator extends AreaMediator {
         [14, [0, 50, 65, 80, 95, 110, 125]],
         [15, [0, 50, 65, 80, 95, 110, 125, 140]],
     ]);
+    getCardPosY(index: number) {
+        if (index == 0) {
+            return 0;
+        }
+        if (index - 1) { }
+    }
 
     initialize(): void {
         super.initialize();
