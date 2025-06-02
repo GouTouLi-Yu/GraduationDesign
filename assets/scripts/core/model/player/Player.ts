@@ -1,12 +1,12 @@
 import { _decorator } from "cc";
 import { Injector } from "../../../project/Injector/Injector";
 import { IPlayerDataType } from "../../../project/manager/GameManager";
-import { ItemModel } from "../item/ItemModel";
+import { CardModel } from "../card/CardModel";
 import { PlayerPrototype } from "./PlayerPrototype";
 const { ccclass, property } = _decorator;
 
 export class Player extends PlayerPrototype {
-    static _instance: Player;
+    private static _instance: Player;
     static get instance() {
         if (!this._instance) {
             this._instance = new Player();
@@ -18,14 +18,14 @@ export class Player extends PlayerPrototype {
         super();
     }
 
-    private _itemModel: ItemModel;
-    get itemModel() {
-        return this._itemModel;
+    private _cardModel: CardModel;
+    get cardModel() {
+        return this._cardModel;
     }
 
     initialize() {
-        this._itemModel = Injector.getInstance(ItemModel);
-        this._itemModel.initialize();
+        this._cardModel = Injector.getInstance(CardModel);
+        this._cardModel.initialize();
     }
 
     // 存放到内存中的数据
@@ -33,19 +33,19 @@ export class Player extends PlayerPrototype {
     syncData(data: IPlayerDataType) {
         super.syncData(data);
         console.log("玩家数据同步：", data);
-        if (data.itemIds != null) {
-            this._itemModel.syncData(data.itemIds);
+        if (data.cardIds != null) {
+            this._cardModel.syncData(data.cardIds);
         }
     }
 
     syncDelData(data: IPlayerDataType) {
         console.log("玩家数据删除：", data);
-        this._itemModel.syncDelData(data.itemIds);
+        this._cardModel.syncDelData(data.cardIds);
     }
 
     clearAll() {
         super.clearAll();
-        this._itemModel.clearAll();
+        this._cardModel.clearAll();
     }
 
     print() {

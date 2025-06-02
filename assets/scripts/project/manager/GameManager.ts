@@ -5,7 +5,7 @@ export interface IPlayerDataType {
     level?: number;
     gold?: number;
     energy?: number;
-    itemIds?: Array<string>;
+    cardIds?: Array<string>;
     attack?: number;
     defense?: number;
     hp?: number;
@@ -21,7 +21,7 @@ export enum EGameDataType {
     level = dataTypePreFix + "level",
     gold = dataTypePreFix + "gold",
     energy = dataTypePreFix + "energy",
-    itemIds = dataTypePreFix + "itemIds",
+    cardIds = dataTypePreFix + "cardIds",
     attack = dataTypePreFix + "attack",
     defense = dataTypePreFix + "defense",
     hp = dataTypePreFix + "hp",
@@ -53,10 +53,10 @@ export class GameManager {
         if (data.energy != null) {
             DataStore.saveNumData(EGameDataType.energy, data.energy);
         }
-        if (data.itemIds != null) {
-            for (let i = 0; i < data.itemIds.length; i++) {
-                const itemId = data.itemIds[i];
-                DataStore.saveStringData(EGameDataType.itemIds + i, itemId);
+        if (data.cardIds != null) {
+            for (let i = 0; i < data.cardIds.length; i++) {
+                const cardId = data.cardIds[i];
+                DataStore.saveStringData(EGameDataType.cardIds + i, cardId);
             }
         }
         if (data.attack != null) {
@@ -92,11 +92,11 @@ export class GameManager {
         DataStore.removeData(EGameDataType.gold);
         DataStore.removeData(EGameDataType.energy);
         let i = 0;
-        let itemKey = EGameDataType.itemIds + i;
-        while (DataStore.getStringData(itemKey) != null) {
-            DataStore.removeData(itemKey);
+        let cardKey = EGameDataType.cardIds + i;
+        while (DataStore.getStringData(cardKey) != null) {
+            DataStore.removeData(cardKey);
             i++;
-            itemKey = EGameDataType.itemIds + i;
+            cardKey = EGameDataType.cardIds + i;
         }
         DataStore.removeData(EGameDataType.attack);
         DataStore.removeData(EGameDataType.defense);
@@ -113,16 +113,16 @@ export class GameManager {
         UIManager.gotoView("MainMenuView");
     }
 
-    private static getItemIds(): Array<string> {
-        let itemIds: Array<string> = [];
+    private static getCardIds(): Array<string> {
+        let cardIds: Array<string> = [];
         let i = 0;
-        let itemKey = EGameDataType.itemIds + i;
-        while (DataStore.getStringData(itemKey) != null) {
-            itemIds.push(DataStore.getStringData(itemKey));
+        let cardKey = EGameDataType.cardIds + i;
+        while (DataStore.getStringData(cardKey) != null) {
+            cardIds.push(DataStore.getStringData(cardKey));
             i++;
-            itemKey = EGameDataType.itemIds + i;
+            cardKey = EGameDataType.cardIds + i;
         }
-        return itemIds;
+        return cardIds;
     }
 
     /** 从磁盘获取玩家数据 */
@@ -131,7 +131,7 @@ export class GameManager {
             level: DataStore.getNumData(EGameDataType.level),
             gold: DataStore.getNumData(EGameDataType.gold),
             energy: DataStore.getNumData(EGameDataType.energy),
-            itemIds: this.getItemIds(),
+            cardIds: this.getCardIds(),
             attack: DataStore.getNumData(EGameDataType.attack),
             defense: DataStore.getNumData(EGameDataType.defense),
             hp: DataStore.getNumData(EGameDataType.hp),

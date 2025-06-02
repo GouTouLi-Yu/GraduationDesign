@@ -1,31 +1,107 @@
 import { ClassConfig } from "../../../project/config/ClassConfig";
-import { Character } from "../character/Character";
-import { Item } from "../item/Item";
 
 export enum ECardQuality {
     nomal = 1,
-    rare,//稀有
-    excellent,//优秀
-    legend//传说
+    rare, //稀有
+    excellent, //优秀
+    legend, //传说
 }
 export enum ECardType {
-    attack = 1,
-    defense,
-    recover,
-    function,//功能
-    buff,
-    debuff
+    /** 单体攻击 */
+    attack_single = 1 << 0,
+    /** 群体攻击 */
+    attack_all = 1 << 1,
+    /** 随机攻击 */
+    attack_random = 1 << 2,
+    /** 防御 --> 给自己加盾 */
+    defense = 1 << 3,
+    /** 恢复 --> 给自身回血 */
+    recover = 1 << 4,
 }
-export class Card extends Item {
+
+export enum ETargetType {
+    self = 1,
+    enemy,
+}
+
+export class Card {
+    private _id: string;
+    get id(): string {
+        return this._id;
+    }
+
     private _cardType: ECardType;
-    private _quality: ECardQuality;
-    private _destroyPrice: number;
-    private _energyCost: number;
-    private _targets: Array<Character>;
+    get cardType(): ECardType {
+        return this._cardType;
+    }
+
+    private _mpCost: Array<number>;
+    get mpCost(): Array<number> {
+        return this._mpCost;
+    }
+
+    private _name: string;
+    get name(): string {
+        return this._name;
+    }
+
+    private _target: ETargetType;
     /** 作用对象 */
-    get targets(): Array<Character> {
-        return this._targets;
+    get target(): ETargetType {
+        return this._target;
+    }
+
+    /** 卡牌描述 */
+    private _desc: string;
+    get desc(): string {
+        return this._desc;
+    }
+
+    private _buyPrice: number;
+    get buyPrice(): number {
+        return this._buyPrice;
+    }
+
+    private _upgradePrice: number;
+    get upgradePrice(): number {
+        return this._upgradePrice;
+    }
+
+    private _factors: Array<Array<number>>;
+    get factors(): Array<Array<number>> {
+        return this._factors;
+    }
+
+    constructor() {
+        this._factors = [];
+    }
+
+    syncData(config: any) {
+        this.setCardType(config);
+        this._mpCost = config.mpCost;
+        this._name = config.name;
+        this._target = config.target;
+        this._desc = config.desc;
+        this._buyPrice = config.buyPrice;
+        this._upgradePrice = config.upgradePrice;
+        this.setFactors(config);
+        this._id = config.id;
+    }
+
+    setCardType(config) {
+        for (let i = 0; i < config.cardType.length; i++) {
+            this._cardType |= config.cardType[i];
+        }
+    }
+
+    setFactors(config) {
+        let i = 1;
+        let id = "factor" + i;
+        while (config[id] != null) {
+            this._factors.push(config[id]);
+            i++;
+            id = "factor" + i;
+        }
     }
 }
 ClassConfig.addClass("Card", Card);
-

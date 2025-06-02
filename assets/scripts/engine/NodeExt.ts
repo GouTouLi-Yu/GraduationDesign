@@ -1,4 +1,4 @@
-import { EventTouch, Node, NodeEventType, Vec2 } from "cc";
+import { EventTouch, instantiate, Node, NodeEventType, Vec2 } from "cc";
 
 declare module "cc" {
     interface Node {
@@ -59,6 +59,11 @@ Node.prototype.addChildCC = function (
     if (tag !== undefined) {
         child.setTag(tag);
     }
+};
+
+Node.prototype.clone = function (): Node {
+    let newNode = instantiate(this);
+    return newNode;
 };
 
 Node.prototype.addClickListener = function (callback: Function) {
