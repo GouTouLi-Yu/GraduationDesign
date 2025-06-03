@@ -4,6 +4,9 @@ import { Card } from "./Card";
 
 export class CardModel {
     private _cards: Array<Card>;
+    get cards() {
+        return this._cards;
+    }
 
     initialize() {
         this._cards = [];

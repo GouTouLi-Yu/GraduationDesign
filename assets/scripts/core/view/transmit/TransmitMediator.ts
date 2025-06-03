@@ -76,8 +76,6 @@ export class TransmitMediator extends AreaMediator {
 
     enterWithData(data?: any) {
         super.enterWithData(data);
-        this._player.print();
-
         this.setupView();
     }
     setupView() {

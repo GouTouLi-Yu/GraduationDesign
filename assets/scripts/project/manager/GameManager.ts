@@ -4,13 +4,13 @@ import { UIManager } from "./UIManager";
 export interface IPlayerDataType {
     level?: number;
     gold?: number;
-    energy?: number;
+    mp?: number;
     cardIds?: Array<string>;
     attack?: number;
     defense?: number;
     hp?: number;
     remainHp?: number;
-    remainEnergy?: number;
+    remainMp?: number;
     name?: string;
     quest?: number;
 }
@@ -20,13 +20,13 @@ const dataTypePreFix = "data_";
 export enum EGameDataType {
     level = dataTypePreFix + "level",
     gold = dataTypePreFix + "gold",
-    energy = dataTypePreFix + "energy",
+    mp = dataTypePreFix + "mp",
     cardIds = dataTypePreFix + "cardIds",
     attack = dataTypePreFix + "attack",
     defense = dataTypePreFix + "defense",
     hp = dataTypePreFix + "hp",
     remainHp = dataTypePreFix + "remainHp",
-    remainEnergy = dataTypePreFix + "remainEnergy",
+    remainMp = dataTypePreFix + "remainMp",
     name = dataTypePreFix + "name",
     quest = dataTypePreFix + "quest",
 }
@@ -50,8 +50,8 @@ export class GameManager {
         if (data.gold != null) {
             DataStore.saveNumData(EGameDataType.gold, data.gold);
         }
-        if (data.energy != null) {
-            DataStore.saveNumData(EGameDataType.energy, data.energy);
+        if (data.mp != null) {
+            DataStore.saveNumData(EGameDataType.mp, data.mp);
         }
         if (data.cardIds != null) {
             for (let i = 0; i < data.cardIds.length; i++) {
@@ -71,11 +71,8 @@ export class GameManager {
         if (data.remainHp != null) {
             DataStore.saveNumData(EGameDataType.remainHp, data.remainHp);
         }
-        if (data.remainEnergy != null) {
-            DataStore.saveNumData(
-                EGameDataType.remainEnergy,
-                data.remainEnergy
-            );
+        if (data.remainMp != null) {
+            DataStore.saveNumData(EGameDataType.remainMp, data.remainMp);
         }
         if (data.name != null) {
             DataStore.saveStringData(EGameDataType.name, data.name);
@@ -90,7 +87,7 @@ export class GameManager {
     static clearPlayerAllDataFromDisk() {
         DataStore.removeData(EGameDataType.level);
         DataStore.removeData(EGameDataType.gold);
-        DataStore.removeData(EGameDataType.energy);
+        DataStore.removeData(EGameDataType.mp);
         let i = 0;
         let cardKey = EGameDataType.cardIds + i;
         while (DataStore.getStringData(cardKey) != null) {
@@ -102,7 +99,7 @@ export class GameManager {
         DataStore.removeData(EGameDataType.defense);
         DataStore.removeData(EGameDataType.hp);
         DataStore.removeData(EGameDataType.remainHp);
-        DataStore.removeData(EGameDataType.remainEnergy);
+        DataStore.removeData(EGameDataType.remainMp);
         DataStore.removeData(EGameDataType.name);
         DataStore.removeData(EGameDataType.quest);
 
@@ -130,13 +127,13 @@ export class GameManager {
         const data: IPlayerDataType = {
             level: DataStore.getNumData(EGameDataType.level),
             gold: DataStore.getNumData(EGameDataType.gold),
-            energy: DataStore.getNumData(EGameDataType.energy),
+            mp: DataStore.getNumData(EGameDataType.mp),
             cardIds: this.getCardIds(),
             attack: DataStore.getNumData(EGameDataType.attack),
             defense: DataStore.getNumData(EGameDataType.defense),
             hp: DataStore.getNumData(EGameDataType.hp),
             remainHp: DataStore.getNumData(EGameDataType.remainHp),
-            remainEnergy: DataStore.getNumData(EGameDataType.remainEnergy),
+            remainMp: DataStore.getNumData(EGameDataType.remainMp),
             name: DataStore.getStringData(EGameDataType.name),
             quest: DataStore.getNumData(EGameDataType.quest),
         };

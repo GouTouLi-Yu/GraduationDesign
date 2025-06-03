@@ -1,4 +1,4 @@
-import { AssetManager, Node, Prefab } from "cc";
+import { Node, Prefab } from "cc";
 import { EventObject } from "../../project/event/EventObject";
 import { Injector } from "../../project/Injector/Injector";
 
@@ -36,7 +36,7 @@ export abstract class Mediator extends EventObject {
     _dipose() {
         let prefab: Prefab = this.view.prefab;
         // MyResManager.printAssetInfo();
-        AssetManager.instance.releaseAsset(prefab);
+        // AssetManager.instance.releaseAsset(prefab);
         this.view.destroy();
         this.view = null;
         this.removeAllListeners();

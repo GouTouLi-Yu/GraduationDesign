@@ -1,4 +1,5 @@
 import { ClassConfig } from "../../../project/config/ClassConfig";
+import { Strings } from "./../../../project/strings/Strings";
 
 export enum ECardQuality {
     nomal = 1,
@@ -54,7 +55,11 @@ export class Card {
     /** 卡牌描述 */
     private _desc: string;
     get desc(): string {
-        return this._desc;
+        return Strings.get(this._desc, {
+            factor1: this._factors[0]?.[this._level - 1],
+            factor2: this._factors[1]?.[this._level - 1],
+            factor3: this._factors[2]?.[this._level - 1],
+        });
     }
 
     private _buyPrice: number;
@@ -70,6 +75,15 @@ export class Card {
     private _factors: Array<Array<number>>;
     get factors(): Array<Array<number>> {
         return this._factors;
+    }
+
+    private _level: number = 1;
+    get level() {
+        return this._level;
+    }
+
+    set level(level: number) {
+        this._level = level;
     }
 
     constructor() {

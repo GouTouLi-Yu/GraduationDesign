@@ -25,14 +25,14 @@ export class PlayerPrototype extends Character {
         return this._gold;
     }
 
-    protected _energy: number;
-    get energy() {
-        return this._energy;
+    protected _mp: number;
+    get mp() {
+        return this._mp;
     }
 
-    protected _remainEnergy: number;
-    get remainEnergy() {
-        return this._remainEnergy;
+    protected _remainMp: number;
+    get remainMp() {
+        return this._remainMp;
     }
 
     syncData(data: IPlayerDataType): void {
@@ -45,11 +45,11 @@ export class PlayerPrototype extends Character {
         if (data.name != null) {
             this._name = data.name;
         }
-        if (data.energy != null) {
-            this._energy = data.energy;
+        if (data.mp != null) {
+            this._mp = data.mp;
         }
-        if (data.remainEnergy != null) {
-            this._remainEnergy = data.remainEnergy;
+        if (data.remainMp != null) {
+            this._remainMp = data.remainMp;
         }
         if (data.gold != null) {
             this._gold = data.gold;
@@ -72,8 +72,8 @@ export class PlayerPrototype extends Character {
         this._level = null;
         this._quest = null;
         this._name = null;
-        this._energy = null;
-        this._remainEnergy = null;
+        this._mp = null;
+        this._remainMp = null;
         this._gold = null;
         this._attack = null;
         this._defense = null;

@@ -33,9 +33,9 @@ export class MyResManager {
         Debug.printMemoryUsage(
             "资源清理前，内存占用情况 -------------------------------------------------------------"
         );
-        this._clearAllAssets();
 
         setTimeout(() => {
+            // this._clearAllAssets();
             Debug.printMemoryUsage(
                 "资源清理后，内存占用情况 -------------------------------------------------------------"
             );

@@ -1,4 +1,13 @@
-import { EventTouch, instantiate, Node, NodeEventType, Vec2 } from "cc";
+import {
+    EventTouch,
+    instantiate,
+    Label,
+    Layout,
+    Node,
+    NodeEventType,
+    RichText,
+    Vec2,
+} from "cc";
 
 declare module "cc" {
     interface Node {
@@ -12,8 +21,58 @@ declare module "cc" {
         addClickListener(callback, noCheckGuide?: boolean, checkMove?: boolean);
         _clickList: any[];
         removeTouchListener();
+        setString(str: string);
+        setLayoutSpacingX(val: number);
+        setLayoutSpacingY(val: number);
+        setPositionX(x: number);
+        setPositionY(y: number);
     }
 }
+
+Node.prototype.setPositionX = function (x: number) {
+    let pos = this.position;
+    pos.x = x;
+    this.position = pos;
+};
+
+Node.prototype.setPositionY = function (y: number) {
+    let pos = this.position;
+    pos.y = y;
+    this.position = pos;
+};
+
+Node.prototype.setLayoutSpacingX = function (val: number) {
+    let layout: Layout = this.getComponent(Layout);
+    if (!layout) {
+        return;
+    }
+    if (layout.type != Layout.Type.HORIZONTAL) {
+        return;
+    }
+    layout.spacingX = val;
+};
+
+Node.prototype.setLayoutSpacingY = function (val: number) {
+    let layout: Layout = this.getComponent(Layout);
+    if (!layout) {
+        return;
+    }
+    if (layout.type != Layout.Type.VERTICAL) {
+        return;
+    }
+    layout.spacingY = val;
+};
+
+Node.prototype.setString = function (str: string) {
+    let label: Label = this.getComponent(Label);
+    if (label) {
+        label.string = str;
+    }
+    let richText: RichText = this.getComponent(RichText);
+    if (richText) {
+        richText.string = str;
+    }
+};
 
 Node.prototype.setLocalZOrder = function (zOrder: number) {
     if (!this.parent) {
