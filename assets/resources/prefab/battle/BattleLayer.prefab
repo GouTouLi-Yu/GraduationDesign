@@ -902,7 +902,7 @@
     "propertyPath": [
       "_enableOutline"
     ],
-    "value": false
+    "value": true
   },
   {
     "__type__": "CCPropertyOverrideInfo",
@@ -914,8 +914,8 @@
     ],
     "value": {
       "__type__": "cc.Size",
-      "width": 80,
-      "height": 25.2
+      "width": 84,
+      "height": 29.2
     }
   },
   {

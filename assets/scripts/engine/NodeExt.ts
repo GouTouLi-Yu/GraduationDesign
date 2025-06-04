@@ -26,8 +26,31 @@ declare module "cc" {
         setLayoutSpacingY(val: number);
         setPositionX(x: number);
         setPositionY(y: number);
+        setPositionCC(pos: Vec2, zOrder?: number);
+        getPositionX(): number;
+        getPositionY(): number;
+        getPositionCC(): Vec2;
     }
 }
+
+Node.prototype.setPositionCC = function (pos: Vec2, zOrder?: number) {
+    this.setPosition(pos.x, pos.y, 1);
+    if (zOrder != null) {
+        this.setLocalZOrder(zOrder);
+    }
+};
+
+Node.prototype.getPositionCC = function () {
+    return new Vec2(this.getPositionX(), this.getPositionY());
+};
+
+Node.prototype.getPositionX = function () {
+    return this.position.x;
+};
+
+Node.prototype.getPositionY = function () {
+    return this.position.y;
+};
 
 Node.prototype.setPositionX = function (x: number) {
     let pos = this.position;

@@ -1,4 +1,4 @@
-import { Node } from "cc";
+import { EventTouch, Layout, Node, NodeEventType, UITransform, Vec3 } from "cc";
 import { ClassConfig } from "../../../project/config/ClassConfig";
 import { ConfigReader } from "../../../project/ConfigReader/ConfigReader";
 import { Card } from "../../model/card/Card";
@@ -22,6 +22,7 @@ export class BattleMediator extends AreaMediator {
     private _heapCards: Array<Card>;
     /** 弃牌堆 */
     private _discardCards: Array<Card>;
+    private _movingCardNode: Node;
 
     get showCardsNum() {
         return Math.max(this._showCards.length, 1);
@@ -123,15 +124,16 @@ export class BattleMediator extends AreaMediator {
         }
     }
 
-    // addShowCards(cards: Array<Card>) {
-    //     for(let i = 0; i < cards.length; i++){
-    //         let card = cards[i];
-    //         if(this._showCards.length >= this._maxShowNum){
-    //             this._discardCards.push(card);
-    //             continue;
-    //         }
-    //     }
-    // }
+    addShowCards(cards: Array<Card>) {
+        for (let i = 0; i < cards.length; i++) {
+            let card = cards[i];
+            if (this._showCards.length >= this._maxShowNum) {
+                this._discardCards.push(card);
+                continue;
+            }
+            this._showCards.push(card);
+        }
+    }
 
     setInitHeapCard() {
         this._heapCards = [...this.allCards];
@@ -146,7 +148,7 @@ export class BattleMediator extends AreaMediator {
             let cardNode = this._cardTempNode.clone();
             cardNode.name = "card" + (i + 1);
             cardNode.active = true;
-            this._cardsPNode.addChildCC(cardNode);
+            this._cardsPNode.addChildCC(cardNode, this.getCardLocalZOrder(i));
             let card = this._showCards[i];
             cardNode
                 .getChildByName("cost")
@@ -155,7 +157,65 @@ export class BattleMediator extends AreaMediator {
             cardNode.getChildByName("desc").setString(card.desc);
             cardNode.setPosition(cardNode.position.x, this.getCardPosY(i), 1);
             cardNode.angle = this.getCardRotation(i);
+            cardNode.index = i;
+            cardNode.card = card;
+
+            if (!cardNode.click) {
+                this.addCardTouchListener(cardNode, card, i);
+                cardNode.click = true;
+            }
         }
+    }
+
+    addCardTouchListener(cardNode: Node, card: Card, index: number) {
+        cardNode.on(NodeEventType.TOUCH_START, (event) => {
+            this.onTouchStart(event, card, cardNode);
+        });
+        cardNode.on(NodeEventType.TOUCH_MOVE, (event) => {
+            this.onTouchMove(event);
+        });
+        cardNode.on(NodeEventType.TOUCH_CANCEL, (event) => {
+            this.onTouchEnd(event);
+        });
+        cardNode.on(NodeEventType.TOUCH_END, (event) => {
+            this.onTouchEnd(event);
+        });
+    }
+
+    onTouchStart(event: EventTouch, card: Card, cardNode: Node) {
+        this._movingCardNode = cardNode;
+        this._movingCardNode.angle = 0;
+        this._movingCardNode.setLocalZOrder(100000);
+        this._cardsPNode.getComponent(Layout).enabled = false;
+    }
+
+    getCardLocalZOrder(index: number): number {
+        return index;
+    }
+
+    onTouchMove(event: EventTouch) {
+        const mousePos = event.getUILocation();
+        const newPos = new Vec3();
+        this._movingCardNode.parent
+            ?.getComponent(UITransform)
+            ?.convertToNodeSpaceAR(new Vec3(mousePos.x, mousePos.y, 1), newPos);
+        this._movingCardNode.setPosition(newPos);
+    }
+
+    recoverCard() {
+        let index = this._movingCardNode.index;
+        this._movingCardNode.setPositionY(this.getCardPosY(index));
+        this._movingCardNode.angle = this.getCardRotation(index);
+        this._movingCardNode.setLocalZOrder(this.getCardLocalZOrder(index));
+        this._cardsPNode.getComponent(Layout).enabled = true;
+        this._movingCardNode = null;
+    }
+
+    onTouchEnd(event: EventTouch) {
+        if (!this._movingCardNode) {
+            return;
+        }
+        this.recoverCard();
     }
 }
 ClassConfig.addClass("BattleMediator", BattleMediator);
