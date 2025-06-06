@@ -1,18 +1,27 @@
 import { _decorator, Node } from "cc";
 import { ClassConfig } from "../../../project/config/ClassConfig";
+import { ConfigReader } from "../../../project/ConfigReader/ConfigReader";
 import { PCEventType } from "../../../project/event/EventType";
 import { TypewriterEffect } from "../../../UIComponent/TypeWriter";
+import { QuestHelper } from "../../helper/QuestHelper";
 import { Player } from "../../model/player/Player";
 import { AreaMediator } from "../AreaMediator";
 const { ccclass, property } = _decorator;
-/* export enum EMapLevel {
-    challenge,
-    elite,
-    boss,
-    event,
-    shop,
-    camp,
-} */
+export enum EMapLevel {
+    /** 挑战(普通小怪) */
+    challenge = "challenge",
+    /** 精英 */
+    elite = "elite",
+    /** boss */
+    boss = "boss",
+    /** 事件 */
+    event = "event",
+    /** 商店 */
+    shop = "shop",
+    /** 营地 */
+    camp = "camp",
+}
+
 export class TransmitMediator extends AreaMediator {
     private _player: Player;
     static fullPath: string = "prefab/transmit/";
@@ -30,21 +39,18 @@ export class TransmitMediator extends AreaMediator {
     private _portalRight: Node;
     //private _portalleftText: Node;
     //private _portalRightText: Node;
-    private _currentportal1: number;
-    private _currentportal2: number;
-    /* private _levelNameMap: Object = {
-        [EMapLevel.challenge]: "挑战",
-        [EMapLevel.elite]: "精英",
-        [EMapLevel.boss]: "boss",
-        [EMapLevel.event]: "事件",
-        [EMapLevel.shop]: "商店",
-        [EMapLevel.camp]: "营地",
-    }; */
+    private _leftType: EMapLevel;
+    private _rightType: EMapLevel;
+
     //********************************************************** */
     initialize() {
         super.initialize();
         this._player = Player.instance;
         this.setText();
+    }
+
+    get quest() {
+        return this._player.quest;
     }
 
     onRegister() {
@@ -60,9 +66,10 @@ export class TransmitMediator extends AreaMediator {
         //this._richTextNode = this._textNode.getChildByName("RichText");
         // this._rtComponent = this._richTextNode.getComponent(RichText);
         this._chatEndNode = this._textNode.getChildByName("chatEnd");
-        this._typeWriter = this._textNode.getChildByName("RichText").getComponent(TypewriterEffect);
-        this._currentportal1 = Math.floor(Math.random() * 6);
-        this._currentportal2 = Math.floor(Math.random() * 6);
+        this._typeWriter = this._textNode
+            .getChildByName("RichText")
+            .getComponent(TypewriterEffect);
+
         this._portalLeft = this.view.getChildByName("portalLeft");
         this._portalRight = this.view.getChildByName("portalRight");
         //this._portalleftText = this._portalLeft.getChildByName("Label");
@@ -79,20 +86,70 @@ export class TransmitMediator extends AreaMediator {
         this.setupView();
     }
     setupView() {
-        this.setBuddleNode();
-        this.setTextBg();
-        this.setChatEnd();
+        // this.setBuddleNode();
+        // this.setTextBg();
+        // this.setChatEnd();
+        this.setTransmit();
+    }
+
+    // 当前关卡的传送门数据
+    get transmitCfg() {
+        let questId = QuestHelper.curQuestId;
+        let cfg = ConfigReader.getDataById("TransmitLevelConfig", questId);
+        return cfg;
+    }
+
+    setTransmit() {
+        this.setTransmitType(true);
+        this.setTransmitType(false);
+        this.setTransmitImg(true);
+        this.setTransmitImg(false);
+    }
+
+    setTransmitImg(left: boolean) {
+        let pathMap = ConfigReader.getDataByIdAndKey(
+            "TransmitConfig",
+            "transmit",
+            "imgPath"
+        );
+        let node = left ? this._portalLeft : this._portalRight;
+        let path = pathMap[this._leftType];
+        node.loadTexture("res/portal/" + path);
+    }
+
+    setTransmitType(left: boolean) {
+        let typeJson = left
+            ? this.transmitCfg.leftNextType
+            : this.transmitCfg.rightNextType;
+
+        let total = 0;
+        let transmitType: EMapLevel = left ? this._leftType : this._rightType;
+        let arr: Array<[string, number]> = [];
+        for (let type in typeJson) {
+            let probility = typeJson[type];
+            arr.push([type, probility]);
+            total += probility;
+        }
+        let random = Math.floor(Math.random() * total + 1);
+        let _probilibty = 0;
+        for (let i = 0; i < arr.length; i++) {
+            let [type, probility] = arr[i];
+            _probilibty += probility;
+            if (random <= _probilibty) {
+                transmitType = type as EMapLevel;
+                break;
+            }
+        }
     }
 
     setupPortal() {
-        this._portalLeft.addClickListener(() => { });
+        this._portalLeft.addClickListener(() => {});
     }
     showPortalText() {
         /* this._currentportal1 = ConfigReader.getDataByIdAndKey("TransmitLevelConfig", "id", "leftNextType");
         this._portalLeft.getChildByName("Label").setString(this._currentportal1.toString());
         this._currentportal2 = ConfigReader.getDataByIdAndKey("TransmitLevelConfig", "id", "rightNextType");
         this._portalRight.getChildByName("Label").setString(this._currentportal2.toString()); */
-
         /*  this._portalleftText.getComponent(Label).string =
              this._levelNameMap[this._currentportal1];
          this._portalRightText.getComponent(Label).string =
@@ -113,7 +170,9 @@ export class TransmitMediator extends AreaMediator {
     }
     setChatEnd() {
         //this._rtComponent.string = this._Alice_text[this._currentIndex];
-        this._textNode.getChildByName("RichText").setString(this._Alice_text[this._currentIndex]);
+        this._textNode
+            .getChildByName("RichText")
+            .setString(this._Alice_text[this._currentIndex]);
         this._chatEndNode.addClickListener(() => {
             this._currentIndex++; //索引+1
             if (this._currentIndex >= this._Alice_text.length) {

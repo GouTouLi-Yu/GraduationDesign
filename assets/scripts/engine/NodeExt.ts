@@ -8,6 +8,7 @@ import {
     RichText,
     Vec2,
 } from "cc";
+import { MyResManager } from "../project/manager/ResManager";
 
 declare module "cc" {
     interface Node {
@@ -33,8 +34,13 @@ declare module "cc" {
         getWidth(): number;
         getHeight(): number;
         getSize(): Vec2;
+        loadTexture(url: string, callback?: Function);
     }
 }
+
+Node.prototype.loadTexture = function (url: string) {
+    MyResManager.loadTexture(this, url);
+};
 
 Node.prototype.getWidth = function () {
     return this.getContentSize().width;

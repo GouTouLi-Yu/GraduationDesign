@@ -6,6 +6,7 @@
       1,
       2,
       3
-    ]
+    ],
+    "imgPath": "{\"challenge\":\"transmit_img_challenge\",\"eltie\":\"transmit_img_elite\",\"boss\":\"transmit_img_boss\",\"shop\":\"transmit_img_shop\",\"event\":\"transmit_img_event\",\"camp\":\"transmit_img_camp\"}"
   }
 ]
