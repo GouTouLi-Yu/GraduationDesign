@@ -45,5 +45,30 @@ export class CardModel {
     print() {
         console.log("玩家道具数据：", this._cards);
     }
+
+    getAllCardIdsByLevel(level: number): Array<string> {
+        if (level == 0) {
+            return [];
+        }
+        let levels = [...ConfigReader.getAllId("PlayerLevelConfig")];
+        let i = 0;
+        for (let id of levels) {
+            if (Number(id) > level) {
+                levels.length = i;
+                break;
+            }
+            i++;
+        }
+        let cardIds = new Array<string>();
+        for (let id of levels) {
+            let newCardsId = ConfigReader.getDataByIdAndKey(
+                "PlayerLevelConfig",
+                id,
+                "newCardsId"
+            );
+            cardIds = cardIds.concat(newCardsId);
+        }
+        return cardIds;
+    }
 }
 ClassConfig.addClass("CardModel", CardModel);
