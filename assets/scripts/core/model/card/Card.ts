@@ -1,4 +1,5 @@
 import { ClassConfig } from "../../../project/config/ClassConfig";
+import { ConfigReader } from "../../../project/ConfigReader/ConfigReader";
 import { Strings } from "./../../../project/strings/Strings";
 
 export enum ECardQuality {
@@ -86,8 +87,10 @@ export class Card {
         this._level = level;
     }
 
-    constructor() {
+    constructor(id: string) {
         this._factors = [];
+        let cardConfig = ConfigReader.getDataById("CardConfig", id);
+        this.syncData(cardConfig);
     }
 
     syncData(config: any) {

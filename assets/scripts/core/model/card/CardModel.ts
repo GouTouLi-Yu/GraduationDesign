@@ -18,9 +18,7 @@ export class CardModel {
         }
         for (let i = 0; i < cardIds.length; i++) {
             let cardId = cardIds[i];
-            let cardConfig = ConfigReader.getDataById("CardConfig", cardId);
-            let card = new Card();
-            card.syncData(cardConfig);
+            let card = new Card(cardId);
             this._cards.push(card);
         }
     }

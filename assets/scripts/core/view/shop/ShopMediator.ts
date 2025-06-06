@@ -1,6 +1,5 @@
 import { _decorator, Node } from "cc";
 import { ClassConfig } from "../../../project/config/ClassConfig";
-import { ConfigReader } from "../../../project/ConfigReader/ConfigReader";
 import { Card } from "../../model/card/Card";
 import { Player } from "../../model/player/Player";
 import { AreaMediator } from "../AreaMediator";
@@ -13,14 +12,13 @@ export class ShopMediator extends AreaMediator {
     private _singleNode: Node;
     private _exhibitcards: Array<Card>;
     private _initCardNum: number = 7;
-    private _cards: Array<Card>;
     private _allCards: Array<number>;
     private _currentIndex: number = 0;
     private _player: Player;
     get exhibitCardsNum() {
         return Math.max(this._exhibitcards.length, 1); //按情况来说最小数量应该是7张
     }
-    getCardRotation(index: number) { }
+    getCardRotation(index: number) {}
     initialize(): void {
         super.initialize();
         this._exhibitcards = [];
@@ -34,7 +32,6 @@ export class ShopMediator extends AreaMediator {
         this._singleNode = this.view.getChildByName("Single");
         this._allCards = [];
         this._player = Player.instance;
-        this._cards = [];
     }
     enterWithData(data?: any): void {
         super.enterWithData(data);
@@ -45,10 +42,12 @@ export class ShopMediator extends AreaMediator {
     }
 
     addExhibitCards() {
-        let cardsId = this._player.cardModel.getAllCardIdsByLevel(this._player.level);
+        let cardsId = this._player.cardModel.getAllCardIdsByLevel(
+            this._player.level
+        );
         for (let i = 0; i < cardsId.length; i++) {
-            this._cards[i] = ConfigReader.getDataById("CardConfig", cardsId[i])
-            this._exhibitcards.push(this._cards[i]);
+            let card = new Card(cardsId[i]);
+            this._exhibitcards.push(card);
             console.log("卡牌：", this._exhibitcards);
         }
         /* for (let i = 0; i < this._player.level - 1; i++) {
@@ -102,6 +101,6 @@ export class ShopMediator extends AreaMediator {
             cardNode.card = card;
         }
     }
-    start() { }
+    start() {}
 }
 ClassConfig.addClass("ShopMediator", ShopMediator);
