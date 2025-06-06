@@ -1,45 +1,45 @@
-import { _decorator, Label, Node, RichText } from "cc";
+import { _decorator, Node } from "cc";
 import { ClassConfig } from "../../../project/config/ClassConfig";
 import { PCEventType } from "../../../project/event/EventType";
 import { TypewriterEffect } from "../../../UIComponent/TypeWriter";
 import { Player } from "../../model/player/Player";
 import { AreaMediator } from "../AreaMediator";
 const { ccclass, property } = _decorator;
-export enum EMapLevel {
+/* export enum EMapLevel {
     challenge,
     elite,
     boss,
     event,
     shop,
     camp,
-}
+} */
 export class TransmitMediator extends AreaMediator {
     private _player: Player;
     static fullPath: string = "prefab/transmit/";
     private _buddleNode: Node;
     private _textNode: Node;
     private _typeWriter: TypewriterEffect;
-    private _richTextNode: Node;
+    //private _richTextNode: Node;
     private _chatEndNode: Node;
     private _textBgNode: Node;
-    private _rtComponent: RichText; //富文本组件
+    //private _rtComponent: RichText; //富文本组件
     //********************************************************** */
     private _currentIndex: number = 0;
     private _Alice_text: Array<string>;
     private _portalLeft: Node;
     private _portalRight: Node;
-    private _portalleftText: Node;
-    private _portalRightText: Node;
+    //private _portalleftText: Node;
+    //private _portalRightText: Node;
     private _currentportal1: number;
     private _currentportal2: number;
-    private _levelNameMap: Object = {
+    /* private _levelNameMap: Object = {
         [EMapLevel.challenge]: "挑战",
         [EMapLevel.elite]: "精英",
         [EMapLevel.boss]: "boss",
         [EMapLevel.event]: "事件",
         [EMapLevel.shop]: "商店",
         [EMapLevel.camp]: "营地",
-    };
+    }; */
     //********************************************************** */
     initialize() {
         super.initialize();
@@ -57,16 +57,16 @@ export class TransmitMediator extends AreaMediator {
         this._buddleNode = this.view.getChildByName("buddle");
         this._textNode = this.view.getChildByName("chatText");
         this._textBgNode = this._textNode.getChildByName("textBg");
-        this._richTextNode = this._textNode.getChildByName("RichText");
-        this._rtComponent = this._richTextNode.getComponent(RichText);
+        //this._richTextNode = this._textNode.getChildByName("RichText");
+        // this._rtComponent = this._richTextNode.getComponent(RichText);
         this._chatEndNode = this._textNode.getChildByName("chatEnd");
-        this._typeWriter = this._richTextNode.getComponent(TypewriterEffect);
+        this._typeWriter = this._textNode.getChildByName("RichText").getComponent(TypewriterEffect);
         this._currentportal1 = Math.floor(Math.random() * 6);
         this._currentportal2 = Math.floor(Math.random() * 6);
         this._portalLeft = this.view.getChildByName("portalLeft");
         this._portalRight = this.view.getChildByName("portalRight");
-        this._portalleftText = this._portalLeft.getChildByName("Label");
-        this._portalRightText = this._portalRight.getChildByName("Label");
+        //this._portalleftText = this._portalLeft.getChildByName("Label");
+        //this._portalRightText = this._portalRight.getChildByName("Label");
     }
     mapEventListeners() {
         this.mapEventListener(PCEventType.EVT_TYPE_WRITER_END, this, () => {
@@ -85,13 +85,18 @@ export class TransmitMediator extends AreaMediator {
     }
 
     setupPortal() {
-        this._portalLeft.addClickListener(() => {});
+        this._portalLeft.addClickListener(() => { });
     }
     showPortalText() {
-        this._portalleftText.getComponent(Label).string =
-            this._levelNameMap[this._currentportal1];
-        this._portalRightText.getComponent(Label).string =
-            this._levelNameMap[this._currentportal2];
+        /* this._currentportal1 = ConfigReader.getDataByIdAndKey("TransmitLevelConfig", "id", "leftNextType");
+        this._portalLeft.getChildByName("Label").setString(this._currentportal1.toString());
+        this._currentportal2 = ConfigReader.getDataByIdAndKey("TransmitLevelConfig", "id", "rightNextType");
+        this._portalRight.getChildByName("Label").setString(this._currentportal2.toString()); */
+
+        /*  this._portalleftText.getComponent(Label).string =
+             this._levelNameMap[this._currentportal1];
+         this._portalRightText.getComponent(Label).string =
+             this._levelNameMap[this._currentportal2]; */
     }
     setText() {
         this._Alice_text = [
@@ -107,7 +112,8 @@ export class TransmitMediator extends AreaMediator {
         });
     }
     setChatEnd() {
-        this._rtComponent.string = this._Alice_text[this._currentIndex];
+        //this._rtComponent.string = this._Alice_text[this._currentIndex];
+        this._textNode.getChildByName("RichText").setString(this._Alice_text[this._currentIndex]);
         this._chatEndNode.addClickListener(() => {
             this._currentIndex++; //索引+1
             if (this._currentIndex >= this._Alice_text.length) {
@@ -120,9 +126,6 @@ export class TransmitMediator extends AreaMediator {
         });
     }
 
-    setRichText() {
-        let richText = this._richTextNode.getComponent(RichText);
-    }
     setBuddleNode() {
         this._buddleNode.addClickListener(() => {
             this._textNode.active = true;
