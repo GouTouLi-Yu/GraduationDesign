@@ -187,19 +187,28 @@ export class BattleMediator extends AreaMediator {
         this._movingCardNode.angle = 0;
         this._movingCardNode.setLocalZOrder(100000);
         this._cardsPNode.getComponent(Layout).enabled = false;
+        this.moveCard(event);
     }
 
     getCardLocalZOrder(index: number): number {
         return index;
     }
 
-    onTouchMove(event: EventTouch) {
+    moveCard(event: EventTouch) {
         const mousePos = event.getUILocation();
         const newPos = new Vec3();
         this._movingCardNode.parent
             ?.getComponent(UITransform)
             ?.convertToNodeSpaceAR(new Vec3(mousePos.x, mousePos.y, 1), newPos);
-        this._movingCardNode.setPosition(newPos);
+        this._movingCardNode.setPosition(
+            newPos.x,
+            newPos.y - this._movingCardNode.getHeight() / 2,
+            1
+        );
+    }
+
+    onTouchMove(event: EventTouch) {
+        this.moveCard(event);
     }
 
     recoverCard() {

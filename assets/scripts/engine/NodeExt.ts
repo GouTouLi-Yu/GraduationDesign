@@ -30,8 +30,23 @@ declare module "cc" {
         getPositionX(): number;
         getPositionY(): number;
         getPositionCC(): Vec2;
+        getWidth(): number;
+        getHeight(): number;
+        getSize(): Vec2;
     }
 }
+
+Node.prototype.getWidth = function () {
+    return this.getContentSize().width;
+};
+
+Node.prototype.getHeight = function () {
+    return this.getContentSize().height;
+};
+
+Node.prototype.getSize = function () {
+    return this.getContentSize();
+};
 
 Node.prototype.setPositionCC = function (pos: Vec2, zOrder?: number) {
     this.setPosition(pos.x, pos.y, 1);
