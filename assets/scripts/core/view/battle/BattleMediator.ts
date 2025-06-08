@@ -1,10 +1,14 @@
 import { EventTouch, Layout, Node, NodeEventType, UITransform, Vec3 } from "cc";
 import { ClassConfig } from "../../../project/config/ClassConfig";
 import { ConfigReader } from "../../../project/ConfigReader/ConfigReader";
-import { Card } from "../../model/card/Card";
+import { Card, ETargetType } from "../../model/card/Card";
 import { Player } from "../../model/player/Player";
 import { AreaMediator } from "../AreaMediator";
 
+/**
+ * 可优化：
+ * 1. 对象池
+ */
 export class BattleMediator extends AreaMediator {
     static fullPath: string = "prefab/battle/";
     private _showCards: Array<Card>;
@@ -23,6 +27,7 @@ export class BattleMediator extends AreaMediator {
     /** 弃牌堆 */
     private _discardCards: Array<Card>;
     private _movingCardNode: Node;
+    private _enemiesNode: Array<Node>;
 
     get showCardsNum() {
         return Math.max(this._showCards.length, 1);
@@ -77,6 +82,7 @@ export class BattleMediator extends AreaMediator {
         this._heapCards = [];
         this._discardCards = [];
         this._player = Player.instance;
+        this._enemiesNode = [];
     }
 
     onRegister(): void {
@@ -87,6 +93,10 @@ export class BattleMediator extends AreaMediator {
     registerUI(): void {
         this._cardTempNode = this.view.getChildByName("cardTemp");
         this._cardsPNode = this.view.getChildByName("cards");
+        let enemiesPNode = this.view.getChildByName("enemy");
+        for (let enemyNode of enemiesPNode.children) {
+            this._enemiesNode.push(enemyNode);
+        }
     }
 
     mapEventListeners(): void {}
@@ -98,7 +108,31 @@ export class BattleMediator extends AreaMediator {
 
     setupView() {
         this.setCards();
+        this.setEnemies();
+        this.test();
     }
+
+    test() {
+        let pathMap = ConfigReader.getDataByIdAndKey(
+            "TransmitConfig",
+            "transmit",
+            "imgPath"
+        );
+        this.view
+            .getChildByName("bg")
+            .loadTexture("res/portal/transmit_img_event");
+
+        //node.loadTexture("res/portal/" + path);
+    }
+
+    setEnemies() {
+        for (let i = 0; i < this._enemiesNode.length; i++) {
+            let enemyNode = this._enemiesNode[i];
+            let imgNode = enemyNode.getChildByName("img");
+        }
+    }
+
+    getEnemyWorldPos(i: number) {}
 
     get allCards() {
         return this._player.cardModel.cards;
@@ -146,7 +180,6 @@ export class BattleMediator extends AreaMediator {
         this._cardsPNode.setLayoutSpacingX(this._spaceX[this.showCardsNum - 1]);
         for (let i = 0; i < this.showCardsNum; i++) {
             let cardNode = this._cardTempNode.clone();
-            cardNode.name = "card" + (i + 1);
             cardNode.active = true;
             this._cardsPNode.addChildCC(cardNode, this.getCardLocalZOrder(i));
             let card = this._showCards[i];
@@ -155,15 +188,25 @@ export class BattleMediator extends AreaMediator {
                 .setString(card.mpCost[card.level - 1].toString());
             cardNode.getChildByName("name").setString(card.name);
             cardNode.getChildByName("desc").setString(card.desc);
-            cardNode.setPosition(cardNode.position.x, this.getCardPosY(i), 1);
-            cardNode.angle = this.getCardRotation(i);
             cardNode.index = i;
             cardNode.card = card;
-
             if (!cardNode.click) {
                 this.addCardTouchListener(cardNode, card, i);
                 cardNode.click = true;
             }
+        }
+        this.refreshCards();
+    }
+
+    refreshCards() {
+        this._cardsPNode.setLayoutSpacingX(this._spaceX[this.showCardsNum - 1]);
+        for (let i = 0; i < this.showCardsNum; i++) {
+            let cardNode = this._cardsPNode.children[i];
+            cardNode.name = "card" + (i + 1);
+            cardNode.index = i;
+            cardNode.setPositionY(this.getCardPosY(i));
+            cardNode.angle = this.getCardRotation(i);
+            cardNode.setOpacity(1);
         }
     }
 
@@ -184,6 +227,11 @@ export class BattleMediator extends AreaMediator {
 
     onTouchStart(event: EventTouch, card: Card, cardNode: Node) {
         this._movingCardNode = cardNode;
+        for (let child of this._cardsPNode.children) {
+            if (child != cardNode) {
+                child.setOpacity(0.4);
+            }
+        }
         this._movingCardNode.angle = 0;
         this._movingCardNode.setLocalZOrder(100000);
         this._cardsPNode.getComponent(Layout).enabled = false;
@@ -218,13 +266,32 @@ export class BattleMediator extends AreaMediator {
         this._movingCardNode.setLocalZOrder(this.getCardLocalZOrder(index));
         this._cardsPNode.getComponent(Layout).enabled = true;
         this._movingCardNode = null;
+        for (let i = 0; i < this._cardsPNode.children.length; i++) {
+            let cardNode = this._cardsPNode.children[i];
+            cardNode.setOpacity(1);
+        }
     }
 
     onTouchEnd(event: EventTouch) {
         if (!this._movingCardNode) {
             return;
         }
-        this.recoverCard();
+        console.log("鼠标位置：", event.getUILocation());
+        let mousePos = event.getUILocation();
+        if (mousePos.y > 520) {
+            this._cardsPNode.getComponent(Layout).enabled = true;
+            let index = this._movingCardNode.index;
+            let card = this._showCards[index];
+            if (card.target == ETargetType.enemy_single) {
+            } else {
+                this._movingCardNode.destroy();
+                this._showCards.splice(index, 1);
+                this._movingCardNode = null;
+                this.refreshCards();
+            }
+        } else {
+            this.recoverCard();
+        }
     }
 }
 ClassConfig.addClass("BattleMediator", BattleMediator);

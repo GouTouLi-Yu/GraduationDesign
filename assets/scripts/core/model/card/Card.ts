@@ -23,7 +23,9 @@ export enum ECardType {
 
 export enum ETargetType {
     self = 1,
-    enemy,
+    enemy_single,
+    enemy_all,
+    enemy_random,
 }
 
 export class Card {
@@ -120,5 +122,7 @@ export class Card {
             id = "factor" + i;
         }
     }
+
+    excute() {}
 }
 ClassConfig.addClass("Card", Card);

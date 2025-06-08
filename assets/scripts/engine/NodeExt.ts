@@ -6,6 +6,7 @@ import {
     Node,
     NodeEventType,
     RichText,
+    Sprite,
     Vec2,
 } from "cc";
 import { MyResManager } from "../project/manager/ResManager";
@@ -35,8 +36,37 @@ declare module "cc" {
         getHeight(): number;
         getSize(): Vec2;
         loadTexture(url: string, callback?: Function);
+        setOpacity(val: number);
     }
 }
+
+/** 设置透明度(百分比) */
+Node.prototype.setOpacity = function (val: number) {
+    if (val < 0 || val > 1) {
+        console.error("setOpacity val error", val);
+        return;
+    }
+    let node: Node = this;
+    if (!node) {
+        return;
+    }
+    node.opacity = val * 255;
+    for (let child of node.children) {
+        child.setOpacity(val);
+    }
+    let sprite: Sprite = node.getComponent(Sprite);
+    if (sprite) {
+        let color = sprite.color.clone();
+        color.a = val * 255;
+        sprite.color = color;
+    }
+    let label: Label = node.getComponent(Label);
+    if (label) {
+        let color = label.color.clone();
+        color.a = val * 255;
+        label.color = color;
+    }
+};
 
 Node.prototype.loadTexture = function (url: string) {
     MyResManager.loadTexture(this, url);

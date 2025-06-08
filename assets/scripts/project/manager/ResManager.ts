@@ -126,6 +126,7 @@ export class MyResManager {
      * @param path 资源路径
      */
     static async loadTexture(node: Node, path: string): Promise<void> {
+        path += "/spriteFrame";
         if (!node || !isValid(node)) {
             throw new Error("[ResManager] Invalid node");
         }
