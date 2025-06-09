@@ -63,8 +63,10 @@ export class UIManager {
                 if (mediator.type == EMediatorType.popup) {
                     this.popupViewOpenedMap.set(viewName, mediator);
                 } else {
-                    for (let mediator of this.areaViewOpenedMap.values()) {
+                    for (let viewName of this.areaViewOpenedMap.keys()) {
+                        let mediator = this.areaViewOpenedMap.get(viewName);
                         mediator.dispose();
+                        this.areaViewOpenedMap.delete(viewName);
                     }
                     this.areaViewOpenedMap.set(viewName, mediator);
                 }
