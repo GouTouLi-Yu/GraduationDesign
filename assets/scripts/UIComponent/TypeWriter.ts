@@ -20,7 +20,6 @@ export class TypewriterEffect extends Component {
     private isPlaying: boolean = false;
     private timer: number = 0;
     private tagStack: string[] = []; // 用于处理富文本标签
-
     onLoad() {
         if (!this.richText) {
             this.richText = this.getComponent(RichText)!;

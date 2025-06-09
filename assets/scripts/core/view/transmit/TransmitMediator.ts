@@ -2,11 +2,15 @@ import { _decorator, Node } from "cc";
 import { ClassConfig } from "../../../project/config/ClassConfig";
 import { ConfigReader } from "../../../project/ConfigReader/ConfigReader";
 import { PCEventType } from "../../../project/event/EventType";
+import { EventManager } from "../../../project/manager/EventManager";
+import { UIManager } from "../../../project/manager/UIManager";
 import { TypewriterEffect } from "../../../UIComponent/TypeWriter";
 import { QuestHelper } from "../../helper/QuestHelper";
 import { Player } from "../../model/player/Player";
 import { AreaMediator } from "../AreaMediator";
+import { EMediatorDisposeType } from "../Mediator";
 const { ccclass, property } = _decorator;
+
 export enum EMapLevel {
     /** 挑战(普通小怪) */
     challenge = "challenge",
@@ -28,20 +32,17 @@ export class TransmitMediator extends AreaMediator {
     private _buddleNode: Node;
     private _textNode: Node;
     private _typeWriter: TypewriterEffect;
-    //private _richTextNode: Node;
     private _chatEndNode: Node;
     private _textBgNode: Node;
-    //private _rtComponent: RichText; //富文本组件
     //********************************************************** */
     private _currentIndex: number = 0;
     private _Alice_text: Array<string>;
     private _portalLeft: Node;
     private _portalRight: Node;
-    //private _portalleftText: Node;
-    //private _portalRightText: Node;
     private _leftType: EMapLevel;
     private _rightType: EMapLevel;
-
+    private _currentElem: number;
+    disposeType = EMediatorDisposeType.immediate;
     //********************************************************** */
     initialize() {
         super.initialize();
@@ -57,23 +58,21 @@ export class TransmitMediator extends AreaMediator {
         super.onRegister();
         this.registerUI();
         this.mapEventListeners();
-        this.showPortalText();
     }
     registerUI() {
         this._buddleNode = this.view.getChildByName("buddle");
         this._textNode = this.view.getChildByName("chatText");
         this._textBgNode = this._textNode.getChildByName("textBg");
-        //this._richTextNode = this._textNode.getChildByName("RichText");
-        // this._rtComponent = this._richTextNode.getComponent(RichText);
         this._chatEndNode = this._textNode.getChildByName("chatEnd");
         this._typeWriter = this._textNode
             .getChildByName("RichText")
             .getComponent(TypewriterEffect);
-
         this._portalLeft = this.view.getChildByName("portalLeft");
         this._portalRight = this.view.getChildByName("portalRight");
-        //this._portalleftText = this._portalLeft.getChildByName("Label");
-        //this._portalRightText = this._portalRight.getChildByName("Label");
+        this._currentElem = Math.floor(Math.random() * 3);
+    }
+    dispatchEvents() {
+        EventManager.dispatchEvent(PCEventType.EVT_QUEST_ELEM_SKIP, { currentElem: this._currentElem });//这个数字有啥用？是跟着谁传过去的？
     }
     mapEventListeners() {
         this.mapEventListener(PCEventType.EVT_TYPE_WRITER_END, this, () => {
@@ -86,10 +85,11 @@ export class TransmitMediator extends AreaMediator {
         this.setupView();
     }
     setupView() {
-        // this.setBuddleNode();
-        // this.setTextBg();
-        // this.setChatEnd();
+        this.setBuddleNode();
+        this.setTextBg();
+        this.setChatEnd();
         this.setTransmit();
+        this.setupPortal(this._leftType, this._rightType);
     }
 
     // 当前关卡的传送门数据
@@ -100,8 +100,8 @@ export class TransmitMediator extends AreaMediator {
     }
 
     setTransmit() {
-        this.setTransmitType(true);
-        this.setTransmitType(false);
+        this._leftType = this.setTransmitType(true);
+        this._rightType = this.setTransmitType(false);
         this.setTransmitImg(true);
         this.setTransmitImg(false);
     }
@@ -113,15 +113,16 @@ export class TransmitMediator extends AreaMediator {
             "imgPath"
         );
         let node = left ? this._portalLeft : this._portalRight;
-        let path = pathMap[this._leftType];
+        let type = left ? this._leftType : this._rightType;
+        node.getChildByName("Label").setString(type);
+        let path = pathMap[type];
         node.loadTexture("res/portal/" + path);
     }
 
-    setTransmitType(left: boolean) {
+    setTransmitType(left: boolean): EMapLevel {
         let typeJson = left
             ? this.transmitCfg.leftNextType
             : this.transmitCfg.rightNextType;
-
         let total = 0;
         let transmitType: EMapLevel = left ? this._leftType : this._rightType;
         let arr: Array<[string, number]> = [];
@@ -139,21 +140,27 @@ export class TransmitMediator extends AreaMediator {
                 transmitType = type as EMapLevel;
                 break;
             }
+
         }
+        if (left) {
+            return this._leftType = transmitType;
+        }
+        return this._rightType = transmitType;
     }
 
-    setupPortal() {
-        this._portalLeft.addClickListener(() => {});
-    }
-    showPortalText() {
-        /* this._currentportal1 = ConfigReader.getDataByIdAndKey("TransmitLevelConfig", "id", "leftNextType");
-        this._portalLeft.getChildByName("Label").setString(this._currentportal1.toString());
-        this._currentportal2 = ConfigReader.getDataByIdAndKey("TransmitLevelConfig", "id", "rightNextType");
-        this._portalRight.getChildByName("Label").setString(this._currentportal2.toString()); */
-        /*  this._portalleftText.getComponent(Label).string =
-             this._levelNameMap[this._currentportal1];
-         this._portalRightText.getComponent(Label).string =
-             this._levelNameMap[this._currentportal2]; */
+    setupPortal(leftType: EMapLevel, rightType: EMapLevel) {
+        this._portalLeft.addClickListener(() => {
+            if (leftType === EMapLevel.challenge || leftType === EMapLevel.elite || leftType === EMapLevel.boss) {
+                UIManager.gotoView("BattleView");// 跳转到战斗界面，并关闭当前界面
+            }
+
+        });
+        this._portalRight.addClickListener(() => {
+            if (rightType === EMapLevel.challenge || rightType === EMapLevel.elite || rightType === EMapLevel.boss) {
+
+            }
+
+        })
     }
     setText() {
         this._Alice_text = [
@@ -169,10 +176,10 @@ export class TransmitMediator extends AreaMediator {
         });
     }
     setChatEnd() {
-        //this._rtComponent.string = this._Alice_text[this._currentIndex];
-        this._textNode
-            .getChildByName("RichText")
-            .setString(this._Alice_text[this._currentIndex]);
+        this._chatEndNode.active = false;
+        this._portalLeft.active = false;
+        this._portalRight.active = false;
+        this._textNode.getChildByName("RichText").setString(this._Alice_text[this._currentIndex]);
         this._chatEndNode.addClickListener(() => {
             this._currentIndex++; //索引+1
             if (this._currentIndex >= this._Alice_text.length) {
@@ -186,10 +193,15 @@ export class TransmitMediator extends AreaMediator {
     }
 
     setBuddleNode() {
+        this._textNode.active = false;
         this._buddleNode.addClickListener(() => {
             this._textNode.active = true;
             this._buddleNode.active = false;
         });
+    }
+    dispose(): void {
+        super.dispose();
+        this.dispatchEvent(PCEventType.EVT_TRANSMIT_END);
     }
 }
 ClassConfig.addClass("TransmitMediator", TransmitMediator);

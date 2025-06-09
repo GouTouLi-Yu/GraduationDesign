@@ -1,9 +1,16 @@
 import { _decorator, Node } from "cc";
 import { ClassConfig } from "../../../project/config/ClassConfig";
+import { PCEventType } from "../../../project/event/EventType";
 import { Card } from "../../model/card/Card";
 import { Player } from "../../model/player/Player";
 import { AreaMediator } from "../AreaMediator";
 const { ccclass, property } = _decorator;
+
+export enum ElementType {
+    fire = 1,
+    water = 2,
+    wind = 3
+}
 
 @ccclass("ShopMediator")
 export class ShopMediator extends AreaMediator {
@@ -12,13 +19,12 @@ export class ShopMediator extends AreaMediator {
     private _singleNode: Node;
     private _exhibitcards: Array<Card>;
     private _initCardNum: number = 7;
-    private _allCards: Array<number>;
-    private _currentIndex: number = 0;
     private _player: Player;
+    private _currentElem: ElementType;
     get exhibitCardsNum() {
         return Math.max(this._exhibitcards.length, 1); //按情况来说最小数量应该是7张
     }
-    getCardRotation(index: number) {}
+    getCardRotation(index: number) { }
     initialize(): void {
         super.initialize();
         this._exhibitcards = [];
@@ -26,12 +32,17 @@ export class ShopMediator extends AreaMediator {
     onRegister() {
         super.onRegister();
         this.registerUI();
+        this.mapEventLister();
     }
     registerUI() {
         this._cardsNode = this.view.getChildByName("Cards");
         this._singleNode = this.view.getChildByName("Single");
-        this._allCards = [];
         this._player = Player.instance;
+    }
+    mapEventLister() {
+        this.mapEventListener(PCEventType.EVT_QUEST_ELEM_SKIP, this, (currentElem) => {
+            this._currentElem = currentElem;
+        });
     }
     enterWithData(data?: any): void {
         super.enterWithData(data);
@@ -40,7 +51,6 @@ export class ShopMediator extends AreaMediator {
     setupView() {
         this.setCards();
     }
-
     addExhibitCards() {
         let cardsId = this._player.cardModel.getAllCardIdsByLevel(
             this._player.level
@@ -48,25 +58,7 @@ export class ShopMediator extends AreaMediator {
         for (let i = 0; i < cardsId.length; i++) {
             let card = new Card(cardsId[i]);
             this._exhibitcards.push(card);
-            console.log("卡牌：", this._exhibitcards);
         }
-        /* for (let i = 0; i < this._player.level - 1; i++) {
-            this._cardsId = this._cardsId.concat(
-                ConfigReader.getDataByIdAndKey(
-                    "PlayerLevelConfig",
-                   (i + 1).toString(),
-                   "newCardsId"
-               )
-            );
-          for (let i = 0; i < this._cardsId.length; i++) {
-               // if (!cards) {
-               //   return;
-               // } 
-                 this._exhibitcards.push(cards[this._cardsId[i]]);
-                 console.log("卡牌：", cards[this._cardsId[i]]);
-            }
-         }
-         console.log("展示卡牌：", this._exhibitcards); */
     }
     setCards() {
         this.addExhibitCards();
@@ -101,6 +93,6 @@ export class ShopMediator extends AreaMediator {
             cardNode.card = card;
         }
     }
-    start() {}
+    start() { }
 }
 ClassConfig.addClass("ShopMediator", ShopMediator);

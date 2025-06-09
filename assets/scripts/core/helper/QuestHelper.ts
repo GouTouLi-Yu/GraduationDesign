@@ -6,6 +6,7 @@ export class QuestHelper {
     }
 
     static get curQuestId(): string {
-        return "quest" + this.player.quest;
+        //return "quest" + this.player.quest;
+        return "quest" + 3;
     }
 }
