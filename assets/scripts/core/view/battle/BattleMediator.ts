@@ -1,6 +1,7 @@
 import { EventTouch, Layout, Node, NodeEventType, UITransform, Vec3 } from "cc";
 import { ClassConfig } from "../../../project/config/ClassConfig";
 import { ConfigReader } from "../../../project/ConfigReader/ConfigReader";
+import { MathHelper } from "../../helper/MathHelper";
 import { Card, ETargetType } from "../../model/card/Card";
 import { Player } from "../../model/player/Player";
 import { AreaMediator } from "../AreaMediator";
@@ -28,6 +29,8 @@ export class BattleMediator extends AreaMediator {
     private _discardCards: Array<Card>;
     private _movingCardNode: Node;
     private _enemiesNode: Array<Node>;
+    private _movingCard: Card;
+    private _chooseEnemyIndex: number = 0;
 
     get showCardsNum() {
         return Math.max(this._showCards.length, 1);
@@ -131,8 +134,6 @@ export class BattleMediator extends AreaMediator {
             let imgNode = enemyNode.getChildByName("img");
         }
     }
-
-    getEnemyWorldPos(i: number) {}
 
     get allCards() {
         return this._player.cardModel.cards;
@@ -265,11 +266,26 @@ export class BattleMediator extends AreaMediator {
         this._movingCardNode.angle = this.getCardRotation(index);
         this._movingCardNode.setLocalZOrder(this.getCardLocalZOrder(index));
         this._cardsPNode.getComponent(Layout).enabled = true;
-        this._movingCardNode = null;
+        this.resetMovingCard();
         for (let i = 0; i < this._cardsPNode.children.length; i++) {
             let cardNode = this._cardsPNode.children[i];
             cardNode.setOpacity(1);
         }
+    }
+
+    getEnemyWorldPos(i: number) {}
+
+    private resetMovingCard() {
+        this._movingCardNode = null;
+        this._movingCard = null;
+        this._chooseEnemyIndex = -1;
+    }
+
+    useCard(index: number) {
+        this._movingCardNode.destroy();
+        this._showCards.splice(index, 1);
+        this.resetMovingCard();
+        this.refreshCards();
     }
 
     onTouchEnd(event: EventTouch) {
@@ -282,12 +298,26 @@ export class BattleMediator extends AreaMediator {
             this._cardsPNode.getComponent(Layout).enabled = true;
             let index = this._movingCardNode.index;
             let card = this._showCards[index];
+            // 对敌人单体目标
             if (card.target == ETargetType.enemy_single) {
+                for (let i = 0; i < this._enemiesNode.length; i++) {
+                    let enemyNode = this._enemiesNode[i];
+                    if (
+                        MathHelper.isInNodeByWorld(
+                            mousePos,
+                            enemyNode.getChildByName("img")
+                        )
+                    ) {
+                        // 碰到了敌人
+                        this.useCard(index);
+                        this._chooseEnemyIndex = i;
+                        break;
+                    } else {
+                        this.recoverCard();
+                    }
+                }
             } else {
-                this._movingCardNode.destroy();
-                this._showCards.splice(index, 1);
-                this._movingCardNode = null;
-                this.refreshCards();
+                this.useCard(index);
             }
         } else {
             this.recoverCard();
