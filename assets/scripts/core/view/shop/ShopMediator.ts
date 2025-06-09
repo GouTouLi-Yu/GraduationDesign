@@ -21,6 +21,7 @@ export class ShopMediator extends AreaMediator {
     private _initCardNum: number = 7;
     private _player: Player;
     private _currentElem: ElementType;
+    private _BgNode: Node;
     get exhibitCardsNum() {
         return Math.max(this._exhibitcards.length, 1); //按情况来说最小数量应该是7张
     }
@@ -37,11 +38,14 @@ export class ShopMediator extends AreaMediator {
     registerUI() {
         this._cardsNode = this.view.getChildByName("Cards");
         this._singleNode = this.view.getChildByName("Single");
+        this._BgNode = this.view.getChildByName("shopBg");
         this._player = Player.instance;
     }
     mapEventLister() {
         this.mapEventListener(PCEventType.EVT_QUEST_ELEM_SKIP, this, (currentElem) => {
             this._currentElem = currentElem;
+            let path = this._currentElem;
+            this._BgNode.loadTexture("res/shop/" + "shop-" + path);
         });
     }
     enterWithData(data?: any): void {

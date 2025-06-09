@@ -1,4 +1,4 @@
-import { _decorator, Node } from "cc";
+import { Node } from "cc";
 import { ClassConfig } from "../../../project/config/ClassConfig";
 import { ConfigReader } from "../../../project/ConfigReader/ConfigReader";
 import { PCEventType } from "../../../project/event/EventType";
@@ -8,8 +8,6 @@ import { TypewriterEffect } from "../../../UIComponent/TypeWriter";
 import { QuestHelper } from "../../helper/QuestHelper";
 import { Player } from "../../model/player/Player";
 import { AreaMediator } from "../AreaMediator";
-import { EMediatorDisposeType } from "../Mediator";
-const { ccclass, property } = _decorator;
 
 export enum EMapLevel {
     /** 挑战(普通小怪) */
@@ -42,7 +40,6 @@ export class TransmitMediator extends AreaMediator {
     private _leftType: EMapLevel;
     private _rightType: EMapLevel;
     private _currentElem: number;
-    disposeType = EMediatorDisposeType.immediate;
     //********************************************************** */
     initialize() {
         super.initialize();
@@ -72,7 +69,7 @@ export class TransmitMediator extends AreaMediator {
         this._currentElem = Math.floor(Math.random() * 3);
     }
     dispatchEvents() {
-        EventManager.dispatchEvent(PCEventType.EVT_QUEST_ELEM_SKIP, { currentElem: this._currentElem });//这个数字有啥用？是跟着谁传过去的？
+        EventManager.dispatchEvent(PCEventType.EVT_QUEST_ELEM_SKIP, { currentElem: this._currentElem });
     }
     mapEventListeners() {
         this.mapEventListener(PCEventType.EVT_TYPE_WRITER_END, this, () => {
@@ -140,7 +137,6 @@ export class TransmitMediator extends AreaMediator {
                 transmitType = type as EMapLevel;
                 break;
             }
-
         }
         if (left) {
             return this._leftType = transmitType;
@@ -149,17 +145,40 @@ export class TransmitMediator extends AreaMediator {
     }
 
     setupPortal(leftType: EMapLevel, rightType: EMapLevel) {
+        let viewJson = ConfigReader.getDataByIdAndKey("TransmitConfig", "transmit", "viewName");
+        let arr: Array<[string, string]> = [];
+
+        for (let type in viewJson) {
+            let probility = viewJson[type];
+            arr.push([type, probility]);
+
+        }
+        console.log("this._view", arr);
         this._portalLeft.addClickListener(() => {
             if (leftType === EMapLevel.challenge || leftType === EMapLevel.elite || leftType === EMapLevel.boss) {
                 UIManager.gotoView("BattleView");// 跳转到战斗界面，并关闭当前界面
             }
-
+            for (let i = 0; i < arr.length; i++) {
+                let [type, probility] = arr[i];
+                if (type === leftType) {
+                    console.log(type);
+                    UIManager.gotoView(probility);
+                    break;
+                }
+            }
         });
         this._portalRight.addClickListener(() => {
             if (rightType === EMapLevel.challenge || rightType === EMapLevel.elite || rightType === EMapLevel.boss) {
-
+                UIManager.gotoView("BattleView");
             }
-
+            for (let i = 0; i < arr.length; i++) {
+                let [type, probility] = arr[i];
+                if (type === rightType) {
+                    console.log(type);
+                    UIManager.gotoView(probility);
+                    break;
+                }
+            }
         })
     }
     setText() {
@@ -198,10 +217,6 @@ export class TransmitMediator extends AreaMediator {
             this._textNode.active = true;
             this._buddleNode.active = false;
         });
-    }
-    dispose(): void {
-        super.dispose();
-        this.dispatchEvent(PCEventType.EVT_TRANSMIT_END);
     }
 }
 ClassConfig.addClass("TransmitMediator", TransmitMediator);
