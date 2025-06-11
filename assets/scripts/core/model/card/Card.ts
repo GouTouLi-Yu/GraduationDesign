@@ -1,5 +1,6 @@
 import { ClassConfig } from "../../../project/config/ClassConfig";
 import { ConfigReader } from "../../../project/ConfigReader/ConfigReader";
+import { Character } from "../character/Character";
 import { Strings } from "./../../../project/strings/Strings";
 
 export enum ECardQuality {
@@ -49,9 +50,15 @@ export class Card {
         return this._name;
     }
 
-    private _target: ETargetType;
+    private _targetType: ETargetType;
+    /** 作用对象类型 */
+    get targetType(): ETargetType {
+        return this._targetType;
+    }
+
+    private _target: Character;
     /** 作用对象 */
-    get target(): ETargetType {
+    get target(): Character {
         return this._target;
     }
 
@@ -99,7 +106,7 @@ export class Card {
         this.setCardType(config);
         this._mpCost = config.mpCost;
         this._name = config.name;
-        this._target = config.target;
+        this._targetType = config.target;
         this._desc = config.desc;
         this._buyPrice = config.buyPrice;
         this._upgradePrice = config.upgradePrice;
@@ -123,6 +130,12 @@ export class Card {
         }
     }
 
-    excute() {}
+    excute(target: Character) {
+        this._target = target;
+    }
+
+    end() {
+        this._target = null;
+    }
 }
 ClassConfig.addClass("Card", Card);

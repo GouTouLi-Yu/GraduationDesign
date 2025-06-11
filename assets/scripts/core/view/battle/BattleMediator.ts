@@ -191,6 +191,7 @@ export class BattleMediator extends AreaMediator {
             cardNode.getChildByName("desc").setString(card.desc);
             cardNode.index = i;
             cardNode.card = card;
+
             if (!cardNode.click) {
                 this.addCardTouchListener(cardNode, card, i);
                 cardNode.click = true;
@@ -273,17 +274,15 @@ export class BattleMediator extends AreaMediator {
         }
     }
 
-    getEnemyWorldPos(i: number) {}
-
     private resetMovingCard() {
         this._movingCardNode = null;
         this._movingCard = null;
         this._chooseEnemyIndex = -1;
     }
 
-    useCard(index: number) {
+    useCard() {
+        // this._movingCard.excute();
         this._movingCardNode.destroy();
-        this._showCards.splice(index, 1);
         this.resetMovingCard();
         this.refreshCards();
     }
@@ -297,9 +296,9 @@ export class BattleMediator extends AreaMediator {
         if (mousePos.y > 520) {
             this._cardsPNode.getComponent(Layout).enabled = true;
             let index = this._movingCardNode.index;
-            let card = this._showCards[index];
+            this._movingCard = this._showCards[index];
             // 对敌人单体目标
-            if (card.target == ETargetType.enemy_single) {
+            if (this._movingCard.targetType == ETargetType.enemy_single) {
                 for (let i = 0; i < this._enemiesNode.length; i++) {
                     let enemyNode = this._enemiesNode[i];
                     if (
@@ -309,7 +308,8 @@ export class BattleMediator extends AreaMediator {
                         )
                     ) {
                         // 碰到了敌人
-                        this.useCard(index);
+                        this._showCards.splice(index, 1);
+                        this.useCard();
                         this._chooseEnemyIndex = i;
                         break;
                     } else {
@@ -317,7 +317,8 @@ export class BattleMediator extends AreaMediator {
                     }
                 }
             } else {
-                this.useCard(index);
+                this._showCards.splice(index, 1);
+                this.useCard();
             }
         } else {
             this.recoverCard();

@@ -1,8 +1,10 @@
 import {
+    Color,
     EventTouch,
     instantiate,
     Label,
     Layout,
+    Material,
     Node,
     NodeEventType,
     RichText,
@@ -37,8 +39,64 @@ declare module "cc" {
         getSize(): Vec2;
         loadTexture(url: string, callback?: Function);
         setOpacity(val: number);
+        setGray(isGray: boolean): void;
+        setGrayByMaterial(isGray: boolean, node: Node): void;
     }
 }
+
+Node.prototype.setGrayByMaterial = function (
+    isGray: boolean,
+    materialNode: Node
+) {
+    if (materialNode == null) {
+        console.error("置灰材质节点为空");
+        return;
+    }
+    if (!this) {
+        return;
+    }
+    let tempMaterial: Material;
+    let materialNodeLabel = materialNode.getComponent(Label);
+    let materialNodeSprite = materialNode.getComponent(Sprite);
+    tempMaterial =
+        materialNodeLabel?.customMaterial ?? materialNodeSprite?.customMaterial;
+
+    if (tempMaterial == null) {
+        console.error("置灰材质为空");
+        return;
+    }
+    let sprite: Sprite = this.getComponent(Sprite);
+    if (sprite) {
+        sprite.customMaterial = isGray ? tempMaterial : null;
+    }
+    let label: Label = this.getComponent(Label);
+    if (label) {
+        label.customMaterial = isGray ? tempMaterial : null;
+    }
+    for (let child of this.children) {
+        child.setGrayByMaterial(isGray, materialNode);
+    }
+};
+
+Node.prototype.setGray = function (isGray: boolean) {
+    if (!this) {
+        return;
+    }
+    let sprite: Sprite = this.getComponent(Sprite);
+    let func = (_color: Color): Color => {
+        return isGray ? Color.GRAY : Color.WHITE;
+    };
+    if (sprite) {
+        sprite.color = func(sprite.color);
+    }
+    let label: Label = this.getComponent(Label);
+    if (label) {
+        label.color = func(label.color);
+    }
+    for (let child of this.children) {
+        child.setGray(isGray);
+    }
+};
 
 /** 设置透明度(百分比) */
 Node.prototype.setOpacity = function (val: number) {
