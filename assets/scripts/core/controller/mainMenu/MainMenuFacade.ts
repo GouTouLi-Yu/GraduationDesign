@@ -25,9 +25,9 @@ export class MainMenuFacade extends Facade {
     }
 
     enterGame() {
-        UIManager.gotoView("TransmitView");
+        //UIManager.gotoView("TransmitView");
         //UIManager.gotoView("BattleView");
-        // UIManager.gotoView("ShopView");
+        UIManager.gotoView("ShopView");
     }
 
     opStartGame() {
