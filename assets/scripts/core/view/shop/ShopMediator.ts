@@ -1,6 +1,6 @@
-import { _decorator, Node } from "cc";
+import { _decorator, Button, Node } from "cc";
 import { ClassConfig } from "../../../project/config/ClassConfig";
-import { PCEventType } from "../../../project/event/EventType";
+import { GameManager } from "../../../project/manager/GameManager";
 import { Card } from "../../model/card/Card";
 import { Player } from "../../model/player/Player";
 import { AreaMediator } from "../AreaMediator";
@@ -9,7 +9,7 @@ const { ccclass, property } = _decorator;
 export enum ElementType {
     fire = 1,
     water = 2,
-    wind = 3
+    windy = 3
 }
 
 @ccclass("ShopMediator")
@@ -20,8 +20,10 @@ export class ShopMediator extends AreaMediator {
     private _exhibitcards: Array<Card>;
     private _initCardNum: number = 7;
     private _player: Player;
-    private _currentElem: ElementType;
+    //private _currentElem: ElementType;
     private _BgNode: Node;
+    private _cardNode: Node;
+    private _shopBtn: Node;
     get exhibitCardsNum() {
         return Math.max(this._exhibitcards.length, 1); //按情况来说最小数量应该是7张
     }
@@ -33,27 +35,23 @@ export class ShopMediator extends AreaMediator {
     onRegister() {
         super.onRegister();
         this.registerUI();
-        this.mapEventLister();
     }
     registerUI() {
-        this._cardsNode = this.view.getChildByName("Cards");
-        this._singleNode = this.view.getChildByName("Single");
+        this._cardsNode = this.view.getChildByName("cards");
+        this._singleNode = this.view.getChildByName("single");
         this._BgNode = this.view.getChildByName("shopBg");
+        this._shopBtn = this.view.getChildByName("shopBtn");
         this._player = Player.instance;
     }
-    mapEventLister() {
-        this.mapEventListener(PCEventType.EVT_QUEST_ELEM_SKIP, this, (currentElem) => {
-            this._currentElem = currentElem;
-            let path = this._currentElem;
-            this._BgNode.loadTexture("res/shop/" + "shop-" + path);
-        });
-    }
+
     enterWithData(data?: any): void {
         super.enterWithData(data);
         this.setupView();
     }
     setupView() {
+        this.setElemBg();
         this.setCards();
+        this.setShopping();
     }
     addExhibitCards() {
         let cardsId = this._player.cardModel.getAllCardIdsByLevel(
@@ -63,6 +61,17 @@ export class ShopMediator extends AreaMediator {
             let card = new Card(cardsId[i]);
             this._exhibitcards.push(card);
         }
+    }
+    setElemBg() {
+        let currentIndex = Math.floor(Math.random() * 3);
+        console.log("currentIndex", currentIndex);
+        let path = ElementType[currentIndex + 1];
+        console.log("path", path);
+        if (path == undefined || path == null) {
+            console.log("path is undefined", path);
+        }
+        this._BgNode.loadTexture("res/map/shop/" + "shop_" + path);
+
     }
     setCards() {
         this.addExhibitCards();
@@ -74,7 +83,7 @@ export class ShopMediator extends AreaMediator {
         this._cardsNode.setLayoutSpacingX(this.exhibitCardsNum - 1);
         for (let i = 0; i < this.exhibitCardsNum; i++) {
             let cardNode = this._singleNode.clone();
-            cardNode.name = "Single" + (i + 1);
+            cardNode.name = "single" + (i + 1);
             cardNode.active = true;
             this._cardsNode.addChildCC(cardNode, i);
             let card = this._exhibitcards[i];
@@ -96,6 +105,41 @@ export class ShopMediator extends AreaMediator {
             cardNode.index = i;
             cardNode.card = card;
         }
+    }
+    setItems() { }
+    setShopping() {
+        this._shopBtn.getComponent(Button).interactable = false;
+        for (let i = 0; i < this.exhibitCardsNum; i++) {
+            this._cardNode = this._cardsNode.getChildByName("single" + (i + 1));
+            console.log("this._cardsNode", this._cardsNode);
+            console.log("cardNode", this._cardNode);
+            this._cardNode.buyPrice = this._exhibitcards[i].buyPrice;
+            if (!this._cardNode.click) {
+                this._cardNode.addClickListener(() => {
+                    console.log("this._player.gold", this._player.gold);
+                    console.log("price", this._cardNode.buyPrice);
+                    this._cardNode.getComponent(Button).interactable = false;
+                    if (this._player.gold < this._cardNode.buyPrice) {
+                        //置灰
+                    } if (this._player.gold >= this._cardNode.buyPrice) {
+                        this._shopBtn.getComponent(Button).interactable = true;
+                        this.setShopBtn();
+                    }
+                });
+                this._cardNode.click = true;
+            }
+        }
+
+    }
+    setShopBtn() {
+        this._shopBtn.addClickListener(() => {
+            console.log("this._shopBtn", this._shopBtn.getComponent(Button).interactable);
+            let gold = this._player.gold - this._cardNode.buyPrice;
+            GameManager.saveDataToDisk({ gold: gold });
+            console.log("gold", gold);
+            console.log("this._player.gold", this._player.gold);
+        });
+
     }
     start() { }
 }

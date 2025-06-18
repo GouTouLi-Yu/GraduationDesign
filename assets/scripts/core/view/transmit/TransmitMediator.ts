@@ -2,7 +2,6 @@ import { Node } from "cc";
 import { ClassConfig } from "../../../project/config/ClassConfig";
 import { ConfigReader } from "../../../project/ConfigReader/ConfigReader";
 import { PCEventType } from "../../../project/event/EventType";
-import { EventManager } from "../../../project/manager/EventManager";
 import { UIManager } from "../../../project/manager/UIManager";
 import { TypewriterEffect } from "../../../UIComponent/TypeWriter";
 import { QuestHelper } from "../../helper/QuestHelper";
@@ -39,7 +38,8 @@ export class TransmitMediator extends AreaMediator {
     private _portalRight: Node;
     private _leftType: EMapLevel;
     private _rightType: EMapLevel;
-    private _currentElem: number;
+    private _leftProbility: string;
+    private _rightProbility: string;
     //********************************************************** */
     initialize() {
         super.initialize();
@@ -66,10 +66,9 @@ export class TransmitMediator extends AreaMediator {
             .getComponent(TypewriterEffect);
         this._portalLeft = this.view.getChildByName("portalLeft");
         this._portalRight = this.view.getChildByName("portalRight");
-        this._currentElem = Math.floor(Math.random() * 3);
-    }
-    dispatchEvents() {
-        EventManager.dispatchEvent(PCEventType.EVT_QUEST_ELEM_SKIP, { currentElem: this._currentElem });
+        this._leftProbility = "";
+        this._rightProbility = "";
+
     }
     mapEventListeners() {
         this.mapEventListener(PCEventType.EVT_TYPE_WRITER_END, this, () => {
@@ -82,9 +81,9 @@ export class TransmitMediator extends AreaMediator {
         this.setupView();
     }
     setupView() {
-        this.setBuddleNode();
+        /* this.setBuddleNode();
         this.setTextBg();
-        this.setChatEnd();
+        this.setChatEnd(); */
         this.setTransmit();
         this.setupPortal(this._leftType, this._rightType);
     }
@@ -147,38 +146,24 @@ export class TransmitMediator extends AreaMediator {
     setupPortal(leftType: EMapLevel, rightType: EMapLevel) {
         let viewJson = ConfigReader.getDataByIdAndKey("TransmitConfig", "transmit", "viewName");
         let arr: Array<[string, string]> = [];
-
         for (let type in viewJson) {
             let probility = viewJson[type];
             arr.push([type, probility]);
-
         }
-        console.log("this._view", arr);
+        for (let i = 0; i < arr.length; i++) {
+            let [type, probility] = arr[i];
+            if (type == leftType) {
+                this._leftProbility = probility;
+            }
+            if (type == rightType) {
+                this._rightProbility = probility;
+            }
+        }
         this._portalLeft.addClickListener(() => {
-            if (leftType === EMapLevel.challenge || leftType === EMapLevel.elite || leftType === EMapLevel.boss) {
-                UIManager.gotoView("BattleView");// 跳转到战斗界面，并关闭当前界面
-            }
-            for (let i = 0; i < arr.length; i++) {
-                let [type, probility] = arr[i];
-                if (type === leftType) {
-                    console.log(type);
-                    UIManager.gotoView(probility);
-                    break;
-                }
-            }
+            UIManager.gotoView(this._leftProbility);
         });
         this._portalRight.addClickListener(() => {
-            if (rightType === EMapLevel.challenge || rightType === EMapLevel.elite || rightType === EMapLevel.boss) {
-                UIManager.gotoView("BattleView");
-            }
-            for (let i = 0; i < arr.length; i++) {
-                let [type, probility] = arr[i];
-                if (type === rightType) {
-                    console.log(type);
-                    UIManager.gotoView(probility);
-                    break;
-                }
-            }
+            UIManager.gotoView(this._rightProbility);
         })
     }
     setText() {
