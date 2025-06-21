@@ -168,14 +168,19 @@ const excelConverter: ExcelConverter = {
 
         if (excelData.length < 3) return [];
 
-        const typeDefs: any = excelData[0]; // 第一行：数据类型
-        const fieldNames: any = excelData[1]; // 第二行：字段名
+        console.log("excelData ==== ", excelData);
+
+        const typeDefs: any = excelData[1]; // 第一行：数据类型
+        const fieldNames: any = excelData[2]; // 第二行：字段名
         const result = [];
         const errors: string[] = [];
 
         // 从第三行开始解析数据
-        for (let i = 2; i < excelData.length; i++) {
+        for (let i = 3; i < excelData.length; i++) {
             const row: any = excelData[i];
+            if (row[0] == "$end$") {
+                break;
+            }
             const obj: any = {};
 
             for (let j = 0; j < fieldNames.length; j++) {
@@ -223,7 +228,7 @@ const excelConverter: ExcelConverter = {
             // 获取项目根目录的上一级目录
             const projectParentDir = path.dirname(Editor.Project.path);
             // 设置Excel目录为上一级目录的res/data
-            const excelDir = path.join(projectParentDir, "res", "data");
+            const excelDir = path.join(projectParentDir, "projectRes", "data");
             const outputDir = path.join(
                 Editor.Project.path,
                 "assets",
