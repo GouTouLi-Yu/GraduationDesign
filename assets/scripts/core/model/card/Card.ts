@@ -3,6 +3,18 @@ import { ConfigReader } from "../../../project/ConfigReader/ConfigReader";
 import { Character } from "../character/Character";
 import { Strings } from "./../../../project/strings/Strings";
 
+export interface IAttack {
+    /**
+     * @param val 伤害值
+     * @param segment 攻击段数
+     */
+    excute: (targets: Array<Character>, val: number, segment: number) => void;
+}
+
+export interface IDefense {
+    excute: (val: number) => void;
+}
+
 export enum ECardQuality {
     nomal = 1,
     rare, //稀有
@@ -56,11 +68,8 @@ export class Card {
         return this._targetType;
     }
 
-    private _target: Character;
+    protected _targets: Array<Character>;
     /** 作用对象 */
-    get target(): Character {
-        return this._target;
-    }
 
     /** 卡牌描述 */
     private _desc: string;
@@ -98,6 +107,7 @@ export class Card {
 
     constructor(id: string) {
         this._factors = [];
+        this._targets = [];
         let cardConfig = ConfigReader.getDataById("CardConfig", id);
         this.syncData(cardConfig);
     }
@@ -130,12 +140,12 @@ export class Card {
         }
     }
 
-    excute(target: Character) {
-        this._target = target;
+    excute(targets: Array<Character>) {
+        this._targets = targets;
     }
 
     end() {
-        this._target = null;
+        this._targets = null;
     }
 }
 ClassConfig.addClass("Card", Card);
