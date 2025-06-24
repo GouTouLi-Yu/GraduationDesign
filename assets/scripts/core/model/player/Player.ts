@@ -24,6 +24,7 @@ export class Player extends PlayerPrototype {
     }
 
     initialize() {
+        super.initialize();
         this._cardModel = Injector.getInstance(CardModel);
         this._cardModel.initialize();
     }

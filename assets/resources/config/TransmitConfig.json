@@ -14,6 +14,11 @@
       "shop": "transmit_img_shop",
       "event": "transmit_img_event",
       "camp": "transmit_img_camp"
+    },
+    "viewName": {
+      "shop": "ShopView",
+      "camp": "CampView",
+      "event": "EventView"
     }
   }
 ]

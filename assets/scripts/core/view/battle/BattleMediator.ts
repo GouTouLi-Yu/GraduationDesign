@@ -1,8 +1,11 @@
 import { EventTouch, Layout, Node, NodeEventType, UITransform, Vec3 } from "cc";
 import { ClassConfig } from "../../../project/config/ClassConfig";
 import { ConfigReader } from "../../../project/ConfigReader/ConfigReader";
+import { Injector } from "../../../project/Injector/Injector";
+import { BattleFacade } from "../../controller/battle/BattleFacade";
 import { MathHelper } from "../../helper/MathHelper";
-import { Card, ETargetType } from "../../model/card/Card";
+import { Card } from "../../model/card/Card";
+import { Character } from "../../model/character/Character";
 import { Player } from "../../model/player/Player";
 import { AreaMediator } from "../AreaMediator";
 
@@ -29,8 +32,10 @@ export class BattleMediator extends AreaMediator {
     private _discardCards: Array<Card>;
     private _movingCardNode: Node;
     private _enemiesNode: Array<Node>;
+    private _enemies: Array<Character>;
     private _movingCard: Card;
     private _chooseEnemyIndex: number = 0;
+    private _facade: BattleFacade;
 
     get showCardsNum() {
         return Math.max(this._showCards.length, 1);
@@ -86,6 +91,8 @@ export class BattleMediator extends AreaMediator {
         this._discardCards = [];
         this._player = Player.instance;
         this._enemiesNode = [];
+        this._enemies = [];
+        this._facade = Injector.getInstance(BattleFacade);
     }
 
     onRegister(): void {
@@ -281,7 +288,7 @@ export class BattleMediator extends AreaMediator {
     }
 
     useCard() {
-        // this._movingCard.excute();
+        this._facade.opUseCard(this._movingCard, this._enemies);
         this._movingCardNode.destroy();
         this.resetMovingCard();
         this.refreshCards();
@@ -297,8 +304,8 @@ export class BattleMediator extends AreaMediator {
             this._cardsPNode.getComponent(Layout).enabled = true;
             let index = this._movingCardNode.index;
             this._movingCard = this._showCards[index];
-            // 对敌人单体目标
-            if (this._movingCard.targetType == ETargetType.enemy_single) {
+            // 需要选中目标
+            if (this._movingCard.needChooseTarget) {
                 for (let i = 0; i < this._enemiesNode.length; i++) {
                     let enemyNode = this._enemiesNode[i];
                     if (
@@ -309,8 +316,8 @@ export class BattleMediator extends AreaMediator {
                     ) {
                         // 碰到了敌人
                         this._showCards.splice(index, 1);
-                        this.useCard();
                         this._chooseEnemyIndex = i;
+                        this.useCard();
                         break;
                     } else {
                         this.recoverCard();

@@ -1,26 +1,32 @@
-import { _decorator } from "cc";
 import { ClassConfig } from "../../../project/config/ClassConfig";
-const { ccclass, property } = _decorator;
+import { Battle } from "../battle/Battle";
+import { BuffEffect } from "../BuffEffect/BuffEffect";
 
 export class Character {
-    protected _attack: number;
-    protected _defense: number;
     protected _hp: number;
     protected _remainHp: number;
+    /** value --> remainRound */
+    protected _buffsMap: Map<BuffEffect, number>;
+    protected _battleData: Battle;
+    get battleData() {
+        return this._battleData;
+    }
 
     syncData(data: any) {
-        if (data.attack != null) {
-            this._attack = data.attack;
-        }
-        if (data.defense != null) {
-            this._defense = data.defense;
-        }
         if (data.hp != null) {
             this._hp = data.hp;
         }
         if (data.remainHp != null) {
             this._remainHp = data.remainHp;
         }
+    }
+
+    initialize() {
+        this._buffsMap = new Map();
+    }
+
+    clearBattleData() {
+        this._battleData = null;
     }
 }
 ClassConfig.addClass("Character", Character);

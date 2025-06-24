@@ -35,6 +35,10 @@ export class PlayerPrototype extends Character {
         return this._remainMp;
     }
 
+    initialize(): void {
+        super.initialize();
+    }
+
     syncData(data: IPlayerDataType): void {
         if (data.level != null) {
             this._level = data.level;
@@ -54,12 +58,6 @@ export class PlayerPrototype extends Character {
         if (data.gold != null) {
             this._gold = data.gold;
         }
-        if (data.attack != null) {
-            this._attack = data.attack;
-        }
-        if (data.defense != null) {
-            this._defense = data.defense;
-        }
         if (data.hp != null) {
             this._hp = data.hp;
         }
@@ -75,8 +73,6 @@ export class PlayerPrototype extends Character {
         this._mp = null;
         this._remainMp = null;
         this._gold = null;
-        this._attack = null;
-        this._defense = null;
         this._hp = null;
         this._remainHp = null;
     }
