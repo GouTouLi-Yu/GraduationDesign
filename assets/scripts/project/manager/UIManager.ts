@@ -76,5 +76,22 @@ export class UIManager {
             });
     }
 
+    /**
+     * @param viewNode panel视图的根节点
+     * @param panelName 必须以panel为结尾
+     */
+    static bindViewToNode(viewNode: Node, panelName: string, params?: any) {
+        let mediatorName = panelName;
+        let mediator: Mediator = ClassConfig.getClass(mediatorName);
+        if (!mediator) {
+            console.error(`${mediatorName} not found in ClassConfig`);
+            return;
+        }
+        // 实例化对象
+        mediator = Injector.getInstance(mediatorName);
+        mediator.onRegister();
+        mediator.enterWithData(params);
+    }
+
     static removeView(viewName: string) {}
 }

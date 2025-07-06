@@ -15,7 +15,7 @@ export class AttackStrategy extends NormalChangeAttrisStrategy {
                 value: this._value,
                 segment: segment,
             };
-            target.battleData.hurt(params);
+            target.hurt(params);
         };
     }
 

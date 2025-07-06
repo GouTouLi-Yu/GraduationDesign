@@ -8,6 +8,7 @@ import { Card } from "../../model/card/Card";
 import { Character } from "../../model/character/Character";
 import { Player } from "../../model/player/Player";
 import { AreaMediator } from "../AreaMediator";
+import { CharacterPanel } from "../character/CharacterPanel";
 
 /**
  * 可优化：
@@ -36,6 +37,7 @@ export class BattleMediator extends AreaMediator {
     private _movingCard: Card;
     private _chooseEnemyIndex: number = 0;
     private _facade: BattleFacade;
+    private _characterPanel: CharacterPanel;
 
     get showCardsNum() {
         return Math.max(this._showCards.length, 1);

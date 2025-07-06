@@ -23,6 +23,11 @@ export class Player extends PlayerPrototype {
         return this._cardModel;
     }
 
+    /** 玩家可以修改最大生命值 */
+    set hp(val: number) {
+        this._hp = val;
+    }
+
     initialize() {
         super.initialize();
         this._cardModel = Injector.getInstance(CardModel);

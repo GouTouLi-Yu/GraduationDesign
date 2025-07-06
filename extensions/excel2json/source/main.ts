@@ -228,7 +228,7 @@ const excelConverter: ExcelConverter = {
             // 获取项目根目录的上一级目录
             const projectParentDir = path.dirname(Editor.Project.path);
             // 设置Excel目录为上一级目录的res/data
-            const excelDir = path.join(projectParentDir, "projectRes", "data");
+            const excelDir = path.join(projectParentDir, "lgyyxyres", "data");
             const outputDir = path.join(
                 Editor.Project.path,
                 "assets",

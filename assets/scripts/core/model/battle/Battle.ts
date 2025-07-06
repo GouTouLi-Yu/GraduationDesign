@@ -1,3 +1,6 @@
+import { CharacterPanel } from "../../view/character/CharacterPanel";
+import { Buff } from "../Buff/Buff";
+
 /** normal change attributes params */
 export interface ICharacterNCAParams {
     value: number;
@@ -23,68 +26,35 @@ export enum ETargetNumType {
 }
 
 export class Battle {
-    constructor() {}
-
-    protected _strength: number;
+    private _characterPanel: CharacterPanel;
+    constructor(charcterView: CharacterPanel) {
+        this._characterPanel = charcterView;
+    }
     /** 力量, 影响攻击力 初始为0, 每增加一点力量, 攻击力增加1 */
-    get strength() {
-        return this._strength;
-    }
+    strength: number;
 
-    protected _defense: number;
     /** 防御力, 影响护盾值 初始为0, 每增加一点防御力, 护盾值增加1 */
-    get defense() {
-        return this._defense;
+    defense: number;
+    /** 护盾值, 影响受到伤害时的减免值 初始为0, 每增加一点护盾值, 减免值增加1 */
+    shield: number;
+
+    private _buffsMap: Map<string, Buff>;
+    get buffsMap() {
+        return this._buffsMap;
     }
 
-    protected _shield: number;
-
-    hurt(params: ICharacterNCAParams) {
-        let _params = params as ICharacterHurtParams;
-        let damage = _params.value;
-        let segment = _params.segment;
-        if (_params.ignoreShield) {
-            this.hurtForHP(damage, segment);
-        } else {
-            this.hurtForShield(damage, segment);
-        }
+    addStrength(val: number) {
+        this.strength += val;
+    }
+    addDefense(val: number) {
+        this.defense += val;
+    }
+    addShield(val: number) {
+        this.shield += val;
     }
 
-    addShield(params: ICharacterNCAParams) {
-        let value = params.value;
-        let segment = params.segment;
-    }
-
-    addHP(params: ICharacterNCAParams) {
-        let value = params.value;
-        let segment = params.segment;
-    }
-
-    addMP(params: ICharacterNCAParams) {
-        let value = params.value;
-        let segment = params.segment;
-    }
-
-    syncData(data: IBattleData) {
-        if (data.strength != null) {
-            this._strength += data.strength;
-        }
-        if (data.defense != null) {
-            this._defense += data.defense;
-        }
-        if (data.shield != null) {
-            this._shield += data.shield;
-        }
-    }
-
-    /**
-     * @param damage 伤害值
-     * @param segment 攻击段数
-     */
-    private hurtForHP(damage: number, segment: number) {}
-
-    private hurtForShield(damage: number, segment: number) {
-        if (damage < this._shield) {
-        }
+    getFinalDamage(damage: number): number {
+        // if (this.buffsMap.has()) return 0;
+        return 0;
     }
 }

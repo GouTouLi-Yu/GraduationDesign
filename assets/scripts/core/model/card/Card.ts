@@ -17,18 +17,6 @@ export enum ECardQuality {
     excellent, //优秀
     legend, //传说
 }
-export enum ECardType {
-    /** 单体攻击 */
-    attack_single = 1 << 0,
-    /** 群体攻击 */
-    attack_all = 1 << 1,
-    /** 随机攻击 */
-    attack_random = 1 << 2,
-    /** 防御 --> 给自己加盾 */
-    defense = 1 << 3,
-    /** 恢复 --> 给自身回血 */
-    recover = 1 << 4,
-}
 
 export enum EActionType {
     attack = "attack",
@@ -42,19 +30,12 @@ export abstract class Card {
         return this._id;
     }
 
-    private _cardType: ECardType;
-    get cardType(): ECardType {
-        return this._cardType;
-    }
-
-    private _mpCost: Array<number>;
     get mpCost(): Array<number> {
-        return this._mpCost;
+        return this.cfg.mpCost;
     }
 
-    private _name: string;
     get name(): string {
-        return this._name;
+        return this.cfg.name;
     }
 
     private _targetNumType: ETargetNumType;
@@ -66,23 +47,32 @@ export abstract class Card {
     private _targets: Array<Character>;
     private _executor: Character;
 
-    private _level1Segment: Array<number>;
-    private _level2Segment: Array<number>;
+    private get level1Segment(): Array<number> {
+        return this.cfg.level1Segment;
+    }
+    private get level2Segment(): Array<number> {
+        return this.cfg.level2Segment;
+    }
+
+    private getSegment(level?: number): number {
+        let _level = level ?? this._level;
+        if (_level == 1) {
+            return this.cfg.level1Segment;
+        }
+        return this.cfg.level2Segment ?? this.cfg.level1Segment;
+    }
 
     /** 卡牌描述 */
-    private _desc: string;
     get desc(): string {
         return "";
     }
 
-    private _buyPrice: number;
     get buyPrice(): number {
-        return this._buyPrice;
+        return this.cfg.buyPrice;
     }
 
-    private _upgradePrice: number;
     get upgradePrice(): number {
-        return this._upgradePrice;
+        return this.cfg.upgradePrice;
     }
 
     private _level: number = 1;
@@ -95,17 +85,16 @@ export abstract class Card {
     }
 
     /** 行为id数组 */
-    private _actionIds: Array<string>;
+    private get actionIds(): Array<string> {
+        return this.cfg.actionIds;
+    }
+
     /** 策略数组, 和行为id 一一对应 */
     private _strategise: Array<Strategy>;
 
-    private _level1Factor: Array<number>;
-    private _level2Factor: Array<number>;
-
-    private _needChooseTarget: boolean;
     /** 是否需要选中对象 */
     get needChooseTarget(): boolean {
-        return this._needChooseTarget;
+        return this.cfg.needChooseTarget;
     }
 
     private _chooseIndex: number;
@@ -117,33 +106,31 @@ export abstract class Card {
         this._chooseIndex = index;
     }
 
+    get buffIds(): Array<string> {
+        return this.cfg.buffIds;
+    }
+
+    private get cfg() {
+        return ConfigReader.getDataById("CardConfig", this._id);
+    }
+
     /**
      *
      * @param {Array<Character>} targets : 需要传全部的作用对象
      */
-    constructor(id: string, targets: Array<Character>) {
+    constructor(id: string, targets: Array<Character>, level?: number) {
+        this._id = id;
         this._targets = targets;
         this._executor = Player.instance;
         this._chooseIndex = -1;
+        this._level = level ?? 1;
         let cardConfig = ConfigReader.getDataById("CardConfig", id);
         this.syncData(cardConfig);
     }
 
     syncData(config: any) {
-        this.setCardType(config);
-        this._mpCost = config.mpCost;
-        this._name = config.name;
-        this.setTargetType(config.targetNum);
-        this._desc = config.desc;
-        this._buyPrice = config.buyPrice;
-        this._upgradePrice = config.upgradePrice;
         this._id = config.id;
-        this._level1Factor = config.level1Factor;
-        this._level2Factor = config.level2Factor;
-        this._level1Segment = config.level1Segment;
-        this._level2Segment = config.level2Segment;
-        this._actionIds = config.actionIds;
-        this._needChooseTarget = config.needChooseTarget;
+        this.setTargetType(config.targetNum);
         this.setStrategise();
     }
 
@@ -158,30 +145,21 @@ export abstract class Card {
     }
 
     /** 获取属性值（攻击、防御、恢复等） */
-    private getFactor(index: number): number {
-        if (this._level == 1 || !this._level2Factor[index]) {
-            return this._level1Factor[index];
-        }
-        return this._level2Factor[index];
-    }
-
-    private getSegment(index: number): number {
-        if (this._level == 1 || !this._level2Segment[index]) {
-            return this._level1Segment[index];
-        }
-        return this._level2Segment[index];
+    getFactorByLevel(level?: number): number {
+        let _level = level ?? this._level;
+        return _level == 1 ? this.cfg.level1Factor : this.cfg.level2Factor;
     }
 
     private setStrategise() {
         this._strategise = [];
-        for (let i = 0; i < this._actionIds.length; i++) {
-            let actionId = this._actionIds[i];
+        for (let i = 0; i < this.actionIds.length; i++) {
+            let actionId = this.actionIds[i];
             switch (actionId) {
                 case EActionType.attack:
                     let params: INCASParams = {
                         excutor: this._executor,
                         targets: this._targets,
-                        value: this.getFactor(i),
+                        value: this.getFactorByLevel(i),
                         segment: this.getSegment(i),
                         targetNumType: this.targetNumType,
                         chooseIndex: this._chooseIndex,
@@ -194,12 +172,6 @@ export abstract class Card {
                 case EActionType.recover:
                     break;
             }
-        }
-    }
-
-    private setCardType(config) {
-        for (let i = 0; i < config.cardType.length; i++) {
-            this._cardType |= config.cardType[i];
         }
     }
 

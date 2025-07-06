@@ -5,6 +5,7 @@ import { Injector } from "../../project/Injector/Injector";
 export enum EMediatorType {
     popup,
     area,
+    panel,
 }
 
 export enum EMediatorDisposeType {

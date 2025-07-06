@@ -2,7 +2,23 @@ import { _decorator } from "cc";
 import { MyResManager } from "./../manager/ResManager";
 const { ccclass, property } = _decorator;
 
+export type DeepReadonly<T> = {
+    readonly [P in keyof T]: T[P] extends object ? DeepReadonly<T[P]> : T[P];
+};
 export class ConfigReader {
+    private static deepFreeze<T>(obj: T): DeepReadonly<T> {
+        Object.freeze(obj);
+        for (const key in obj) {
+            if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                const value = obj[key];
+                if (typeof value === "object" && value !== null) {
+                    this.deepFreeze(value);
+                }
+            }
+        }
+        return obj as DeepReadonly<T>;
+    }
+
     // configName --> id --> data
     private static _configMap: Map<string, Map<string, any>>;
     static init() {
@@ -21,18 +37,18 @@ export class ConfigReader {
                     }
                     this._configMap.set(json.name, Object.freeze(map));
                 });
-                this._configMap = Object.freeze(this._configMap);
                 resolve();
             });
         });
     }
 
-    static getDataByIdAndKey(tableName: string, id: string, key: string) {
+    static getDataByIdAndKey(tableName: string, id: string, key: string): any {
         let data = this.getDataById(tableName, id);
         if (!data) {
             return null;
         }
-        return data[key];
+        const val = data[key];
+        return this.deepFreeze(val);
     }
 
     static getDataById(tableName: string, id: string): any {
@@ -47,7 +63,7 @@ export class ConfigReader {
             );
             return null;
         }
-        return table.get(id);
+        return this.deepFreeze(table.get(id));
     }
 
     static getAllId(tableName: string): IterableIterator<string> {
