@@ -1,12 +1,13 @@
 import { ClassConfig } from "../../../project/config/ClassConfig";
-import { CharacterPanel } from "../../view/character/CharacterPanel";
+import { PCEventType } from "../../../project/event/EventType";
+import { EventManager } from "../../../project/manager/EventManager";
 import {
     Battle,
     ICharacterHurtParams,
     ICharacterNCAParams,
 } from "../battle/Battle";
 
-export class Character {
+export abstract class Character {
     protected _hp: number;
     /** 最大生命值 */
     get hp() {
@@ -22,15 +23,7 @@ export class Character {
         this._remainHp = val;
     }
 
-    protected _battleData: Battle;
-
-    get battleData() {
-        return this._battleData;
-    }
-
-    constructor(charcterPanel: CharacterPanel) {
-        this._battleData = new Battle(charcterPanel);
-    }
+    constructor() {}
 
     syncData(data: any) {
         if (data.hp != null) {
@@ -43,10 +36,6 @@ export class Character {
 
     initialize() {}
 
-    clearBattleData() {
-        this._battleData = null;
-    }
-
     hurt(params: ICharacterNCAParams) {
         let _params = params as ICharacterHurtParams;
         let damage = _params.value;
@@ -56,11 +45,6 @@ export class Character {
         } else {
             this.hurtForShield(damage, segment);
         }
-    }
-
-    addShield(params: ICharacterNCAParams) {
-        let value = params.value;
-        let segment = params.segment;
     }
 
     addHP(params: ICharacterNCAParams) {
@@ -73,26 +57,33 @@ export class Character {
         let segment = params.segment;
     }
 
+    abstract getBattleData(): Battle;
+
     /**
      * @param damage 伤害值
      * @param segment 攻击段数
      */
     private hurtForHP(damage: number, segment: number) {
-        damage = this.battleData.getFinalDamage(damage);
+        damage = this.getBattleData().getFinalDamage(damage);
         this._remainHp -= damage;
+        EventManager.dispatchEvent(PCEventType.EVT_CHARACTER_REDUCE_REMAIN_HP, {
+            character: this,
+            damage: damage,
+            segment: segment,
+        });
     }
 
     private hurtForShield(damage: number, segment: number) {
-        if (damage < this.battleData.shield) {
+        let battleData = this.getBattleData();
+        if (damage < battleData.shield) {
             // 播放护盾减少动画
-        } else if (damage == this.battleData.shield) {
+        } else if (damage == battleData.shield) {
             // 播放破盾动画
         } else {
             // 播放破盾动画
             // 播放掉血动画
 
-            let remainDamage = damage - this.battleData.shield;
-            this.battleData.shield = 0;
+            let remainDamage = damage - battleData.shield;
             this.hurtForHP(remainDamage, segment);
         }
     }

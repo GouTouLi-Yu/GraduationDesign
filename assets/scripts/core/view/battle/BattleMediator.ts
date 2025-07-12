@@ -1,14 +1,28 @@
-import { EventTouch, Layout, Node, NodeEventType, UITransform, Vec3 } from "cc";
+import {
+    EventTouch,
+    Layout,
+    Node,
+    NodeEventType,
+    UITransform,
+    Vec2,
+    Vec3,
+} from "cc";
 import { ClassConfig } from "../../../project/config/ClassConfig";
 import { ConfigReader } from "../../../project/ConfigReader/ConfigReader";
+import { PCEventType } from "../../../project/event/EventType";
 import { Injector } from "../../../project/Injector/Injector";
 import { BattleFacade } from "../../controller/battle/BattleFacade";
 import { MathHelper } from "../../helper/MathHelper";
 import { Card } from "../../model/card/Card";
-import { Character } from "../../model/character/Character";
+import { Enemy } from "../../model/enemy/Enemy";
 import { Player } from "../../model/player/Player";
 import { AreaMediator } from "../AreaMediator";
 import { CharacterPanel } from "../character/CharacterPanel";
+import { Character } from "./../../model/character/Character";
+
+export interface IBattleData {
+    enemyIds: Array<string>;
+}
 
 /**
  * 可优化：
@@ -33,11 +47,11 @@ export class BattleMediator extends AreaMediator {
     private _discardCards: Array<Card>;
     private _movingCardNode: Node;
     private _enemiesNode: Array<Node>;
-    private _enemies: Array<Character>;
+    private _enemiePanels: Array<CharacterPanel>;
     private _movingCard: Card;
     private _chooseEnemyIndex: number = 0;
     private _facade: BattleFacade;
-    private _characterPanel: CharacterPanel;
+    private _enemyTempNode: Node;
 
     get showCardsNum() {
         return Math.max(this._showCards.length, 1);
@@ -93,48 +107,75 @@ export class BattleMediator extends AreaMediator {
         this._discardCards = [];
         this._player = Player.instance;
         this._enemiesNode = [];
-        this._enemies = [];
+        this._enemiePanels = [];
         this._facade = Injector.getInstance(BattleFacade);
     }
 
     onRegister(): void {
         super.onRegister();
         this.registerUI();
+        this.mapEventListeners();
     }
 
     registerUI(): void {
         this._cardTempNode = this.view.getChildByName("cardTemp");
         this._cardsPNode = this.view.getChildByName("cards");
-        let enemiesPNode = this.view.getChildByName("enemy");
-        for (let enemyNode of enemiesPNode.children) {
-            this._enemiesNode.push(enemyNode);
-        }
+        this._enemyTempNode = this.view.getChildByName("EnemyTemp");
     }
 
-    mapEventListeners(): void {}
+    getPanelByUuid(id: number): CharacterPanel {
+        return this._enemiePanels.find((panel) => () => {
+            let enemy = panel.character as Enemy;
+            return enemy.uuid == id;
+        });
+    }
 
-    enterWithData(data?: any): void {
+    mapEventListeners(): void {
+        this.mapEventListener(
+            PCEventType.EVT_CHARACTER_REDUCE_REMAIN_HP,
+            this,
+            (params) => {
+                let charcter = params.character as Character;
+                if (charcter instanceof Enemy) {
+                    let panel = this.getPanelByUuid(charcter.uuid);
+                    panel.hurtForHp(params.damage, params.segment);
+                } else {
+                }
+            }
+        );
+    }
+
+    enterWithData(data: IBattleData): void {
         super.enterWithData(data);
+        if (!data) {
+            console.error("进入战斗界面时，没有传任何数据!");
+            return;
+        }
+        if (data.enemyIds) {
+            this.initEnemy(data.enemyIds);
+        }
         this.setupView();
+    }
+
+    initEnemy(enemyIds: Array<string>) {
+        this._enemyTempNode.active = false;
+        let enemiesNode = this.view.getChildByName("enemies");
+        for (let i = 0; i < enemyIds.length; i++) {
+            let enemyId = enemyIds[i];
+            let enemy = new Enemy(enemyId);
+            let enemyNode = this._enemyTempNode.clone();
+            enemyNode.active = true;
+            enemyNode.setPositionCC(new Vec2(0, 0));
+            let characterPanel = new CharacterPanel(enemyNode, enemy);
+            this._enemiePanels.push(characterPanel);
+            enemiesNode.addChildCC(enemyNode);
+            this._enemiesNode.push(enemyNode);
+        }
     }
 
     setupView() {
         this.setCards();
         this.setEnemies();
-        this.test();
-    }
-
-    test() {
-        let pathMap = ConfigReader.getDataByIdAndKey(
-            "TransmitConfig",
-            "transmit",
-            "imgPath"
-        );
-        this.view
-            .getChildByName("bg")
-            .loadTexture("res/portal/transmit_img_event");
-
-        //node.loadTexture("res/portal/" + path);
     }
 
     setEnemies() {
@@ -289,8 +330,20 @@ export class BattleMediator extends AreaMediator {
         this._chooseEnemyIndex = -1;
     }
 
+    get enemies(): Array<Enemy> {
+        let arr = new Array<Enemy>();
+        for (let panel of this._enemiePanels) {
+            arr.push(panel.character as Enemy);
+        }
+        return arr;
+    }
+
     useCard() {
-        this._facade.opUseCard(this._movingCard, this._enemies);
+        this._facade.opUseCard(
+            this._movingCard,
+            this.enemies,
+            this._chooseEnemyIndex
+        );
         this._movingCardNode.destroy();
         this.resetMovingCard();
         this.refreshCards();

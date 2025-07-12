@@ -1,6 +1,8 @@
 import { _decorator } from "cc";
 import { Injector } from "../../../project/Injector/Injector";
 import { IPlayerDataType } from "../../../project/manager/GameManager";
+import { Battle } from "../battle/Battle";
+import { BattleModel } from "../battle/BattleModel";
 import { CardModel } from "../card/CardModel";
 import { PlayerPrototype } from "./PlayerPrototype";
 const { ccclass, property } = _decorator;
@@ -23,6 +25,11 @@ export class Player extends PlayerPrototype {
         return this._cardModel;
     }
 
+    private _battleModel: BattleModel;
+    get battleModel() {
+        return this._battleModel;
+    }
+
     /** 玩家可以修改最大生命值 */
     set hp(val: number) {
         this._hp = val;
@@ -31,7 +38,11 @@ export class Player extends PlayerPrototype {
     initialize() {
         super.initialize();
         this._cardModel = Injector.getInstance(CardModel);
-        this._cardModel.initialize();
+        this._battleModel = Injector.getInstance(BattleModel);
+    }
+
+    getBattleData(): Battle {
+        return this._battleModel.battleData;
     }
 
     // 存放到内存中的数据

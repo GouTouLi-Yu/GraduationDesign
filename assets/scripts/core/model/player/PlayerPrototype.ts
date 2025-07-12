@@ -1,7 +1,7 @@
 import { IPlayerDataType } from "../../../project/manager/GameManager";
 import { Character } from "../character/Character";
 
-export class PlayerPrototype extends Character {
+export abstract class PlayerPrototype extends Character {
     // 存放到磁盘中的数据
     protected _quest: number;
     /** 关卡 */

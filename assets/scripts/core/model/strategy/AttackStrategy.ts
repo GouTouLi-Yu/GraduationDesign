@@ -20,13 +20,17 @@ export class AttackStrategy extends NormalChangeAttrisStrategy {
     }
 
     setFinalValueByBuff() {
-        this._value += this._excutor.battleData.strength;
+        this._value += this._excutor.getBattleData().strength;
     }
 
     setFinalValueByDebuff() {}
 
     excute() {
         super.excute();
+    }
+
+    syncData(data: any) {
+        super.syncData(data);
     }
 
     end() {}

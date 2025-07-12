@@ -10,6 +10,7 @@ import {
     RichText,
     Sprite,
     Vec2,
+    Vec3,
 } from "cc";
 import { MyResManager } from "../project/manager/ResManager";
 
@@ -41,8 +42,19 @@ declare module "cc" {
         setOpacity(val: number);
         setGray(isGray: boolean): void;
         setGrayByMaterial(isGray: boolean, node: Node): void;
+        /** 水平翻转 */
+        setFlipX(isFlip: boolean): void;
     }
 }
+
+/** 水平翻转 */
+Node.prototype.setFlipX = function (isFlip: boolean) {
+    if (!this) {
+        return;
+    }
+    let node: Node = this;
+    node.setScale(new Vec3(isFlip ? -1 : 1, 1, 1));
+};
 
 Node.prototype.setGrayByMaterial = function (
     isGray: boolean,

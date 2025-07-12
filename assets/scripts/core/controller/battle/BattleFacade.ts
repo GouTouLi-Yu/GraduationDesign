@@ -12,8 +12,13 @@ export class BattleFacade extends Facade {
         super.initialize();
     }
 
-    opUseCard(card: Card, targets: Array<Character>, choosingIndex?: number) {
-        card.chooseIndex = choosingIndex;
+    opUseCard(card: Card, targets: Array<Character>, chooseIndex?: number) {
+        let data = {
+            chooseIndex: chooseIndex,
+            targets: targets,
+            executor: Player.instance,
+        };
+        card.syncData(data);
         card.excute(Player.instance, targets);
     }
 }

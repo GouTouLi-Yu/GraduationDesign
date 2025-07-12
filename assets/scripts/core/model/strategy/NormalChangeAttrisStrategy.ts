@@ -42,6 +42,18 @@ export abstract class NormalChangeAttrisStrategy extends Strategy {
         this.setFinalValueByDebuff();
     }
 
+    syncData(data: INCASParams) {
+        if (data.chooseIndex != null) {
+            this._chooseIndex = data.chooseIndex;
+        }
+        if (data.targets != null) {
+            this._targets = data.targets;
+        }
+        if (data.excutor != null) {
+            this._excutor = data.excutor;
+        }
+    }
+
     excute() {
         this.setFinalValue();
         if (this._targetType == ETargetNumType.random) {

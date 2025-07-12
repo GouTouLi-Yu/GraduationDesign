@@ -1,11 +1,13 @@
 import { ClassConfig } from "../../../project/config/ClassConfig";
 import { ConfigReader } from "../../../project/ConfigReader/ConfigReader";
+import { BuffHelper } from "../../helper/BuffHelper";
 import { ETargetNumType } from "../battle/Battle";
 import { Character } from "../character/Character";
 import { Player } from "../player/Player";
 import { AttackStrategy } from "../strategy/AttackStrategy";
 import { INCASParams } from "../strategy/NormalChangeAttrisStrategy";
 import { Strategy } from "../strategy/Strategy";
+import { Strings } from "./../../../project/strings/Strings";
 
 export interface IDefense {
     excute: (val: number) => void;
@@ -24,7 +26,7 @@ export enum EActionType {
     recover = "recover",
 }
 
-export abstract class Card {
+export class Card {
     private _id: string;
     get id(): string {
         return this._id;
@@ -64,7 +66,23 @@ export abstract class Card {
 
     /** 卡牌描述 */
     get desc(): string {
-        return "";
+        let str: string = "";
+        let descs: Array<string> = this.cfg.desc;
+        let actionIds: Array<string> = this.actionIds;
+        let buffIds: Array<string> = this.buffIds;
+        let factors = [
+            ...this.getActionFactorsByLevel(),
+            ...this.getBuffFactorsByLevel(),
+        ];
+        for (let i = 0; i < descs.length; i++) {
+            str += Strings.get(descs[i], {
+                factor: factors[i],
+            });
+            if (i != descs.length - 1) {
+                str += ",";
+            }
+        }
+        return str;
     }
 
     get buyPrice(): number {
@@ -78,10 +96,6 @@ export abstract class Card {
     private _level: number = 1;
     get level() {
         return this._level;
-    }
-
-    set level(level: number) {
-        this._level = level;
     }
 
     /** 行为id数组 */
@@ -102,12 +116,9 @@ export abstract class Card {
     get chooseIndex(): number {
         return this._chooseIndex;
     }
-    set chooseIndex(index: number) {
-        this._chooseIndex = index;
-    }
 
     get buffIds(): Array<string> {
-        return this.cfg.buffIds;
+        return this.cfg.buffIds ?? [];
     }
 
     private get cfg() {
@@ -118,20 +129,31 @@ export abstract class Card {
      *
      * @param {Array<Character>} targets : 需要传全部的作用对象
      */
-    constructor(id: string, targets: Array<Character>, level?: number) {
+    constructor(id: string, level?: number) {
         this._id = id;
-        this._targets = targets;
         this._executor = Player.instance;
         this._chooseIndex = -1;
         this._level = level ?? 1;
-        let cardConfig = ConfigReader.getDataById("CardConfig", id);
-        this.syncData(cardConfig);
+        this.setTargetType(this.cfg.targetNum);
+        this.setStrategise();
     }
 
-    syncData(config: any) {
-        this._id = config.id;
-        this.setTargetType(config.targetNum);
-        this.setStrategise();
+    syncData(data) {
+        if (data.targets != null) {
+            this._targets = data.targets;
+        }
+        if (data.level != null) {
+            this._level = data.level;
+        }
+        if (data.chooseIndex != null) {
+            this._chooseIndex = data.chooseIndex;
+            for (let strategy of this._strategise) {
+                strategy.syncData(data);
+            }
+        }
+        if (data.executor != null) {
+            this._executor = data.executor;
+        }
     }
 
     setTargetType(targetNum: number) {
@@ -145,9 +167,19 @@ export abstract class Card {
     }
 
     /** 获取属性值（攻击、防御、恢复等） */
-    getFactorByLevel(level?: number): number {
+    private getActionFactorsByLevel(level?: number): Array<number> {
         let _level = level ?? this._level;
         return _level == 1 ? this.cfg.level1Factor : this.cfg.level2Factor;
+    }
+
+    private getBuffFactorsByLevel(level?: number): Array<number> {
+        let arr: Array<number> = [];
+        let _level = level ?? this._level;
+        for (let buffId of this.buffIds) {
+            let factor = BuffHelper.getBuffFactor(buffId, _level);
+            arr.push(factor);
+        }
+        return arr;
     }
 
     private setStrategise() {
@@ -159,7 +191,7 @@ export abstract class Card {
                     let params: INCASParams = {
                         excutor: this._executor,
                         targets: this._targets,
-                        value: this.getFactorByLevel(i),
+                        value: this.getActionFactorsByLevel(this.level)[i],
                         segment: this.getSegment(i),
                         targetNumType: this.targetNumType,
                         chooseIndex: this._chooseIndex,
