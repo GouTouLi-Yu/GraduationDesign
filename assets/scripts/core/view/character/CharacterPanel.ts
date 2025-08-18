@@ -1,21 +1,22 @@
 import { Animation, Node } from "cc";
 import { ClassConfig } from "../../../project/config/ClassConfig";
-import { Enemy } from "../../model/enemy/Enemy";
-import { Character } from "./../../model/character/Character";
+import { BattleCharacter } from "../../model/battle/BattleCharacter";
+import { BattleEnemyCharacter } from "../../model/battle/BattleEnemyCharacter";
+import { Player } from "../../model/player/Player";
 
 export class CharacterPanel {
     private _view: Node;
-    private _character: Character;
+    private _character: BattleCharacter;
     get character() {
         return this._character;
     }
 
-    constructor(node: Node, character: Character) {
+    constructor(node: Node, character?: BattleCharacter) {
         this._view = node;
         this._img = this._view.getChildByName("img");
         this._hpLabel = this._view.getChildByName("hpLabel");
         this._buffs = this._view.getChildByName("buffs");
-        this._character = character;
+        this._character = character ?? Player.instance.battlePlayerCharacter;
         this.initialize();
     }
     static fullPath: string = "";
@@ -28,21 +29,21 @@ export class CharacterPanel {
         this.setHpLabel();
     }
 
-    private get enemy(): Enemy {
-        return this._character as Enemy;
-    }
-
     private loadImg() {
         let preFix = "res/character/enemy/mirror/";
-        this._img.loadTexture(preFix + this.enemy.rolePicPath);
-        let str = this.enemy.rolePicPath.split("_");
+        this._img.loadTexture(
+            preFix + (this.character as BattleEnemyCharacter).rolePicPath
+        );
+        let str = (this.character as BattleEnemyCharacter).rolePicPath.split(
+            "_"
+        );
         let flip = Boolean(str[str.length - 1]);
         this._img.setFlipX(flip);
     }
 
     private setHpLabel() {
-        let remainHp = this.enemy.remainHp;
-        let maxHp = this.enemy.hp;
+        let remainHp = this.character.remainHp;
+        let maxHp = this.character.hp;
         this._hpLabel.setString(remainHp + "/" + maxHp);
     }
 

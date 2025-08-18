@@ -16,6 +16,10 @@ export enum EBuffTargetType {
 
 export class Buff {
     private _id: string;
+    get id() {
+        return this._id;
+    }
+
     private _remainRound: number = 0;
     /** 剩余回合数 */
     get remainRound(): number {

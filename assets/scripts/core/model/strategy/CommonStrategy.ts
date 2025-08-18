@@ -1,40 +1,25 @@
 import { _decorator } from "cc";
-import { ETargetNumType } from "../battle/Battle";
-import { Character } from "../character/Character";
-import { Strategy } from "./Strategy";
+import { BattleCharacter, ETargetNumType } from "../battle/BattleCharacter";
+import { ICSParams, Strategy } from "./Strategy";
 const { ccclass, property } = _decorator;
 
-/** 普通形式改变属性策略参数 --> interface normal change attributes strategy params */
-export interface INCASParams {
-    value: number;
-    excutor: Character;
-    /** 作用目标 全部敌人 */
-    targets: Array<Character>;
-    segment: number;
-    targetNumType: ETargetNumType;
-    /** 攻击选择的对象（不传就是随机 或者 全部） */
-    chooseIndex?: number;
-}
-
-export abstract class NormalChangeAttrisStrategy extends Strategy {
-    private _targets: Array<Character>;
+export abstract class CommonStrategy extends Strategy {
     private _chooseIndex: number;
     private _targetType: ETargetNumType;
-    protected _excutor: Character;
+
     protected _segment: number;
     protected _value: number;
 
-    protected _changeFunc: (target: Character, segment: number) => void;
+    protected _changeFunc: (target: BattleCharacter, segment: number) => void;
     protected _params: any;
 
-    constructor(params: INCASParams) {
-        super();
+    constructor(params: ICSParams) {
+        super(params);
         this._value = params.value;
         this._targets = params.targets;
         this._segment = params.segment;
         this._chooseIndex = params.chooseIndex;
         this._targetType = params.targetNumType;
-        this._excutor = params.excutor;
     }
 
     setFinalValue() {
@@ -42,15 +27,12 @@ export abstract class NormalChangeAttrisStrategy extends Strategy {
         this.setFinalValueByDebuff();
     }
 
-    syncData(data: INCASParams) {
+    syncData(data: ICSParams) {
         if (data.chooseIndex != null) {
             this._chooseIndex = data.chooseIndex;
         }
         if (data.targets != null) {
             this._targets = data.targets;
-        }
-        if (data.excutor != null) {
-            this._excutor = data.excutor;
         }
     }
 

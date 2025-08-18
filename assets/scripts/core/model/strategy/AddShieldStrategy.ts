@@ -1,18 +1,8 @@
-import { Character } from "../character/Character";
-import {
-    INCASParams,
-    NormalChangeAttrisStrategy,
-} from "./NormalChangeAttrisStrategy";
+import { CommonStrategy } from "./CommonStrategy";
+import { ICSParams } from "./Strategy";
 
-export interface IAddShieldStrategyParams {
-    targets: Array<Character>;
-    shield: number;
-    segment: number;
-    excutor: Character;
-}
-
-export class AddShieldStrategy extends NormalChangeAttrisStrategy {
-    constructor(params: INCASParams) {
+export class AddShieldStrategy extends CommonStrategy {
+    constructor(params: ICSParams) {
         super(params);
     }
 

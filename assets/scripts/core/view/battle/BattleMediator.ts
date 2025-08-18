@@ -8,17 +8,16 @@ import {
     Vec3,
 } from "cc";
 import { ClassConfig } from "../../../project/config/ClassConfig";
-import { ConfigReader } from "../../../project/ConfigReader/ConfigReader";
 import { PCEventType } from "../../../project/event/EventType";
 import { Injector } from "../../../project/Injector/Injector";
 import { BattleFacade } from "../../controller/battle/BattleFacade";
 import { MathHelper } from "../../helper/MathHelper";
+import { BattleCharacter } from "../../model/battle/BattleCharacter";
+import { BattleEnemyCharacter } from "../../model/battle/BattleEnemyCharacter";
 import { Card } from "../../model/card/Card";
-import { Enemy } from "../../model/enemy/Enemy";
 import { Player } from "../../model/player/Player";
 import { AreaMediator } from "../AreaMediator";
 import { CharacterPanel } from "../character/CharacterPanel";
-import { Character } from "./../../model/character/Character";
 
 export interface IBattleData {
     enemyIds: Array<string>;
@@ -125,7 +124,7 @@ export class BattleMediator extends AreaMediator {
 
     getPanelByUuid(id: number): CharacterPanel {
         return this._enemiePanels.find((panel) => () => {
-            let enemy = panel.character as Enemy;
+            let enemy = panel.character as BattleEnemyCharacter;
             return enemy.uuid == id;
         });
     }
@@ -135,8 +134,8 @@ export class BattleMediator extends AreaMediator {
             PCEventType.EVT_CHARACTER_REDUCE_REMAIN_HP,
             this,
             (params) => {
-                let charcter = params.character as Character;
-                if (charcter instanceof Enemy) {
+                let charcter = params.character as BattleCharacter;
+                if (charcter instanceof BattleEnemyCharacter) {
                     let panel = this.getPanelByUuid(charcter.uuid);
                     panel.hurtForHp(params.damage, params.segment);
                 } else {
@@ -162,7 +161,7 @@ export class BattleMediator extends AreaMediator {
         let enemiesNode = this.view.getChildByName("enemies");
         for (let i = 0; i < enemyIds.length; i++) {
             let enemyId = enemyIds[i];
-            let enemy = new Enemy(enemyId);
+            let enemy = new BattleEnemyCharacter(enemyId);
             let enemyNode = this._enemyTempNode.clone();
             enemyNode.active = true;
             enemyNode.setPositionCC(new Vec2(0, 0));
@@ -191,11 +190,7 @@ export class BattleMediator extends AreaMediator {
 
     // 设置初始化卡牌
     setInitCards() {
-        this._initCardNum = ConfigReader.getDataByIdAndKey(
-            "PlayerConfig",
-            "player",
-            "initCardsId"
-        ).length;
+        this._initCardNum = this._player.cardModel.cards.length;
         let min = 0;
         for (let i = 0; i < this._initCardNum; i++) {
             let max = this._heapCards.length - 1;
@@ -330,10 +325,10 @@ export class BattleMediator extends AreaMediator {
         this._chooseEnemyIndex = -1;
     }
 
-    get enemies(): Array<Enemy> {
-        let arr = new Array<Enemy>();
+    get enemies(): Array<BattleEnemyCharacter> {
+        let arr = new Array<BattleEnemyCharacter>();
         for (let panel of this._enemiePanels) {
-            arr.push(panel.character as Enemy);
+            arr.push(panel.character as BattleEnemyCharacter);
         }
         return arr;
     }

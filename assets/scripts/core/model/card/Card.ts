@@ -1,12 +1,10 @@
 import { ClassConfig } from "../../../project/config/ClassConfig";
 import { ConfigReader } from "../../../project/ConfigReader/ConfigReader";
 import { BuffHelper } from "../../helper/BuffHelper";
-import { ETargetNumType } from "../battle/Battle";
-import { Character } from "../character/Character";
-import { Player } from "../player/Player";
+import { ETargetNumType } from "../battle/BattleCharacter";
+import { BattleEnemyCharacter } from "../battle/BattleEnemyCharacter";
 import { AttackStrategy } from "../strategy/AttackStrategy";
-import { INCASParams } from "../strategy/NormalChangeAttrisStrategy";
-import { Strategy } from "../strategy/Strategy";
+import { ICSParams, Strategy } from "../strategy/Strategy";
 import { Strings } from "./../../../project/strings/Strings";
 
 export interface IDefense {
@@ -46,8 +44,7 @@ export class Card {
         return this._targetNumType;
     }
 
-    private _targets: Array<Character>;
-    private _executor: Character;
+    private _targets: Array<BattleEnemyCharacter>;
 
     private get level1Segment(): Array<number> {
         return this.cfg.level1Segment;
@@ -127,11 +124,10 @@ export class Card {
 
     /**
      *
-     * @param {Array<Character>} targets : 需要传全部的作用对象
+     * @param {Array<BattleCharacter>} targets : 需要传全部的作用对象
      */
     constructor(id: string, level?: number) {
         this._id = id;
-        this._executor = Player.instance;
         this._chooseIndex = -1;
         this._level = level ?? 1;
         this.setTargetType(this.cfg.targetNum);
@@ -150,9 +146,6 @@ export class Card {
             for (let strategy of this._strategise) {
                 strategy.syncData(data);
             }
-        }
-        if (data.executor != null) {
-            this._executor = data.executor;
         }
     }
 
@@ -188,8 +181,7 @@ export class Card {
             let actionId = this.actionIds[i];
             switch (actionId) {
                 case EActionType.attack:
-                    let params: INCASParams = {
-                        excutor: this._executor,
+                    let params: ICSParams = {
                         targets: this._targets,
                         value: this.getActionFactorsByLevel(this.level)[i],
                         segment: this.getSegment(i),
@@ -207,9 +199,8 @@ export class Card {
         }
     }
 
-    excute(excutor: Character, targets: Array<Character>) {
+    excute(targets: Array<BattleEnemyCharacter>) {
         this._targets = targets;
-        this._executor = excutor;
         for (let index in this._strategise) {
             this._strategise[index].excute();
         }

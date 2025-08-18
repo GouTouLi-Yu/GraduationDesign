@@ -48,7 +48,7 @@ export class TransmitMediator extends AreaMediator {
     }
 
     get quest() {
-        return this._player.quest;
+        return 1;
     }
 
     onRegister() {
@@ -68,7 +68,6 @@ export class TransmitMediator extends AreaMediator {
         this._portalRight = this.view.getChildByName("portalRight");
         this._leftProbility = "";
         this._rightProbility = "";
-
     }
     mapEventListeners() {
         this.mapEventListener(PCEventType.EVT_TYPE_WRITER_END, this, () => {
@@ -138,13 +137,17 @@ export class TransmitMediator extends AreaMediator {
             }
         }
         if (left) {
-            return this._leftType = transmitType;
+            return (this._leftType = transmitType);
         }
-        return this._rightType = transmitType;
+        return (this._rightType = transmitType);
     }
 
     setupPortal(leftType: EMapLevel, rightType: EMapLevel) {
-        let viewJson = ConfigReader.getDataByIdAndKey("TransmitConfig", "transmit", "viewName");
+        let viewJson = ConfigReader.getDataByIdAndKey(
+            "TransmitConfig",
+            "transmit",
+            "viewName"
+        );
         let arr: Array<[string, string]> = [];
         for (let type in viewJson) {
             let probility = viewJson[type];
@@ -164,7 +167,7 @@ export class TransmitMediator extends AreaMediator {
         });
         this._portalRight.addClickListener(() => {
             UIManager.gotoView(this._rightProbility);
-        })
+        });
     }
     setText() {
         this._Alice_text = [
@@ -183,7 +186,9 @@ export class TransmitMediator extends AreaMediator {
         this._chatEndNode.active = false;
         this._portalLeft.active = false;
         this._portalRight.active = false;
-        this._textNode.getChildByName("RichText").setString(this._Alice_text[this._currentIndex]);
+        this._textNode
+            .getChildByName("RichText")
+            .setString(this._Alice_text[this._currentIndex]);
         this._chatEndNode.addClickListener(() => {
             this._currentIndex++; //索引+1
             if (this._currentIndex >= this._Alice_text.length) {

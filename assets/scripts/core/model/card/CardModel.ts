@@ -1,43 +1,51 @@
 import { ClassConfig } from "../../../project/config/ClassConfig";
+import { GameConfig } from "../../../project/config/GameConfig";
 import { ConfigReader } from "../../../project/ConfigReader/ConfigReader";
 import { Card } from "./Card";
-
 export class CardModel {
     private _cards: Array<Card>;
     get cards() {
         return this._cards;
     }
 
-    initialize() {
-        this._cards = [];
+    initialize() {}
+
+    constructor() {
+        this.initCards();
     }
 
-    syncData(cardIds: Array<string>) {
-        if (cardIds == null || cardIds.length == 0) {
-            return;
-        }
-        for (let i = 0; i < cardIds.length; i++) {
-            let cardId = cardIds[i];
-            let card = new Card(cardId);
-            this._cards.push(card);
-        }
+    initCards() {
+        this._cards = [...GameConfig.playerInitCfg.initCardsId];
     }
 
-    syncDelData(cardIds: Array<string>) {
-        if (cardIds == null || cardIds.length == 0) {
-            return;
-        }
-        for (let i = cardIds.length - 1; i >= 0; i--) {
-            let cardId = cardIds[i];
-            let index = this._cards.findIndex((card) => card.id == cardId);
-            if (index != -1) {
-                this._cards.splice(index, 1);
+    syncData(data) {
+        if (data.cardIds != null) {
+            let cardIds = data.cardIds;
+            if (cardIds == null || cardIds.length == 0) {
+                return;
+            }
+            for (let i = 0; i < cardIds.length; i++) {
+                let cardId = cardIds[i];
+                let card = new Card(cardId);
+                this._cards.push(card);
             }
         }
     }
 
-    clearAll() {
-        this._cards = [];
+    syncDelData(data) {
+        if (data.cardIds != null || data.cardIds.length != 0) {
+            let cardIds = data.cardIds;
+            if (cardIds == null || cardIds.length == 0) {
+                return;
+            }
+            for (let i = cardIds.length - 1; i >= 0; i--) {
+                let cardId = cardIds[i];
+                let index = this._cards.findIndex((card) => card.id == cardId);
+                if (index != -1) {
+                    this._cards.splice(index, 1);
+                }
+            }
+        }
     }
 
     print() {

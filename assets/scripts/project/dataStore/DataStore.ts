@@ -25,7 +25,7 @@ export class DataStore {
 
     static getObjectData(key: string): Object {
         let jsonStr = sys.localStorage.getItem(key);
-        return JSON.parse(jsonStr);
+        return JSON.parse(jsonStr) ?? {};
     }
 
     static removeData(key: string) {
