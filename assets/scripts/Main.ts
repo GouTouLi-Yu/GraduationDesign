@@ -20,11 +20,11 @@ export class Main extends Component {
         Injector.init();
         EventManager.init();
         ConfigReader.init();
-        GameManager.init();
     }
 
     start() {
         this.initConfig().then(() => {
+            GameManager.init();
             this.startGame();
         });
     }

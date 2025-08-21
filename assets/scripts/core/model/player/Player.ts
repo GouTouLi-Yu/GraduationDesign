@@ -61,8 +61,8 @@ export class Player extends Model {
     }
 
     initialize() {
-        this._cardModel = Injector.getInstance(CardModel);
         this._battleModel = Injector.getInstance(BattleModel);
+        this._cardModel = Injector.getInstance(CardModel);
         this._questModel = Injector.getInstance(QuestModel);
     }
 

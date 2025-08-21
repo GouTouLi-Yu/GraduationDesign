@@ -1,6 +1,6 @@
-import { GameConfig } from "../config/GameConfig";
-import { DataStore } from "../dataStore/DataStore";
+import { director } from "cc";
 import { Player } from "./../../core/model/player/Player";
+import { PlayerDataManager } from "./PlayerDataManager";
 import { UIManager } from "./UIManager";
 
 export class GameManager {
@@ -8,32 +8,26 @@ export class GameManager {
     static init() {
         Player.instance.initialize();
         this._player = Player.instance;
+        this.addGlobalTimer();
     }
 
-    static syncPlayerData(data) {
-        Player.instance.syncData(data);
-    }
-
-    /** 保存数据到磁盘 */
-    static saveDataToDisk(data) {
-        DataStore.saveObjectData(GameConfig.playerAllDataKey, data);
-        this.syncPlayerData(data);
-    }
-
-    /** 清空玩家所有数据（磁盘） */
-    static clearPlayerAllDataFromDisk() {
-        DataStore.removeData(GameConfig.playerAllDataKey);
+    static addGlobalTimer() {
+        let scheduler = director.getScheduler();
+        scheduler.schedule(
+            () => {
+                console.log("全局计时器");
+            },
+            {
+                id: "3",
+                uuid: "uuid_3",
+            },
+            1
+        );
     }
 
     static startGame() {
-        let data = this.getPlayerDataFromDisk();
+        let data = PlayerDataManager.getPlayerDataFromDisk();
         this._player.syncData(data);
         UIManager.gotoView("MainMenuView");
-    }
-
-    /** 从磁盘获取玩家数据 */
-    static getPlayerDataFromDisk() {
-        let data = DataStore.getObjectData(GameConfig.playerAllDataKey);
-        return data;
     }
 }

@@ -1,5 +1,4 @@
 import { ClassConfig } from "../../../project/config/ClassConfig";
-import { GameConfig } from "../../../project/config/GameConfig";
 import { ConfigReader } from "../../../project/ConfigReader/ConfigReader";
 import { Card } from "./Card";
 export class CardModel {
@@ -15,7 +14,7 @@ export class CardModel {
     }
 
     initCards() {
-        this._cards = [...GameConfig.playerInitCfg.initCardsId];
+        this._cards = [];
     }
 
     syncData(data) {

@@ -1,4 +1,3 @@
-import { GameConfig } from "../../../project/config/GameConfig";
 import { BattleCharacter } from "./BattleCharacter";
 
 export class BattlePlayerCharacter extends BattleCharacter {
@@ -11,9 +10,6 @@ export class BattlePlayerCharacter extends BattleCharacter {
 
     constructor() {
         super();
-        this._mp = GameConfig.playerInitCfg.mp;
-        this._hp = GameConfig.playerInitCfg.hp;
-        this._remainHp = this._hp;
     }
 
     clear() {

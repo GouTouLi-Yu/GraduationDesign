@@ -31,4 +31,8 @@ export class DataStore {
     static removeData(key: string) {
         sys.localStorage.removeItem(key);
     }
+
+    static removeAllData() {
+        sys.localStorage.clear();
+    }
 }
