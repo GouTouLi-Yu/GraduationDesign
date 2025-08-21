@@ -1,6 +1,5 @@
 import { director } from "cc";
 import { Player } from "./../../core/model/player/Player";
-import { PlayerDataManager } from "./PlayerDataManager";
 import { UIManager } from "./UIManager";
 
 export class GameManager {
@@ -26,8 +25,6 @@ export class GameManager {
     }
 
     static startGame() {
-        let data = PlayerDataManager.getPlayerDataFromDisk();
-        this._player.syncData(data);
         UIManager.gotoView("MainMenuView");
     }
 }

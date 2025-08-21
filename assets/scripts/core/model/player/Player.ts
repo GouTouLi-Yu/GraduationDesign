@@ -5,6 +5,7 @@ import { BattleModel } from "../battle/BattleModel";
 import { Card } from "../card/Card";
 import { CardModel } from "../card/CardModel";
 import { Model } from "../Model";
+import { EMapType } from "../portal/portal";
 import { QuestModel } from "../quest/QuestModel";
 const { ccclass, property } = _decorator;
 
@@ -60,6 +61,12 @@ export class Player extends Model {
         return this._battleModel.battlePlayerCharacter;
     }
 
+    private _lastMapType: EMapType = null;
+    /** 最后一次停留界面类型（用于重登游戏） --> null为传送门界面 */
+    get lastMapType() {
+        return this._lastMapType;
+    }
+
     initialize() {
         this._battleModel = Injector.getInstance(BattleModel);
         this._cardModel = Injector.getInstance(CardModel);
@@ -78,6 +85,9 @@ export class Player extends Model {
         }
         if (data.gold != null) {
             this._gold = data.gold;
+        }
+        if (data.lastMapType != null) {
+            this._lastMapType = data.lastMapType;
         }
         if (data.battleModelData != null) {
             this._battleModel.syncData(data.battleModelData);
@@ -101,9 +111,5 @@ export class Player extends Model {
         if (data.cardModelData != null) {
             this._cardModel.syncDelData(data.cardModelData);
         }
-    }
-
-    print() {
-        console.log("玩家数据：", this);
     }
 }

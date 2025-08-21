@@ -6,22 +6,9 @@ import { UIManager } from "../../../project/manager/UIManager";
 import { TypewriterEffect } from "../../../UIComponent/TypeWriter";
 import { QuestHelper } from "../../helper/QuestHelper";
 import { Player } from "../../model/player/Player";
+import { EMapType, Portal } from "../../model/portal/portal";
+import { QuestModel } from "../../model/quest/QuestModel";
 import { AreaMediator } from "../AreaMediator";
-
-export enum EMapLevel {
-    /** 挑战(普通小怪) */
-    challenge = "challenge",
-    /** 精英 */
-    elite = "elite",
-    /** boss */
-    boss = "boss",
-    /** 事件 */
-    event = "event",
-    /** 商店 */
-    shop = "shop",
-    /** 营地 */
-    camp = "camp",
-}
 
 export class TransmitMediator extends AreaMediator {
     private _player: Player;
@@ -36,19 +23,15 @@ export class TransmitMediator extends AreaMediator {
     private _Alice_text: Array<string>;
     private _portalLeft: Node;
     private _portalRight: Node;
-    private _leftType: EMapLevel;
-    private _rightType: EMapLevel;
-    private _leftProbility: string;
-    private _rightProbility: string;
+    private _leftType: EMapType;
+    private _rightType: EMapType;
+    private _questModel: QuestModel;
     //********************************************************** */
     initialize() {
         super.initialize();
         this._player = Player.instance;
         this.setText();
-    }
-
-    get quest() {
-        return 1;
+        this._questModel = this._player.questModel;
     }
 
     onRegister() {
@@ -66,8 +49,6 @@ export class TransmitMediator extends AreaMediator {
             .getComponent(TypewriterEffect);
         this._portalLeft = this.view.getChildByName("portalLeft");
         this._portalRight = this.view.getChildByName("portalRight");
-        this._leftProbility = "";
-        this._rightProbility = "";
     }
     mapEventListeners() {
         this.mapEventListener(PCEventType.EVT_TYPE_WRITER_END, this, () => {
@@ -83,8 +64,8 @@ export class TransmitMediator extends AreaMediator {
         /* this.setBuddleNode();
         this.setTextBg();
         this.setChatEnd(); */
-        this.setTransmit();
-        this.setupPortal(this._leftType, this._rightType);
+        this.setTransmit(true);
+        this.setTransmit(false);
     }
 
     // 当前关卡的传送门数据
@@ -94,81 +75,35 @@ export class TransmitMediator extends AreaMediator {
         return cfg;
     }
 
-    setTransmit() {
-        this._leftType = this.setTransmitType(true);
-        this._rightType = this.setTransmitType(false);
-        this.setTransmitImg(true);
-        this.setTransmitImg(false);
+    setTransmit(left: boolean) {
+        this.setTransmitType(left);
+        this.setTransmitType(!left);
+        this.setupPortal(left);
+        this.setupPortal(!left);
     }
 
-    setTransmitImg(left: boolean) {
-        let pathMap = ConfigReader.getDataByIdAndKey(
-            "TransmitConfig",
-            "transmit",
-            "imgPath"
-        );
+    setTransmitType(left: boolean) {
+        if (left) {
+            this._leftType = this._questModel.getNextQuestType(true);
+        } else {
+            this._rightType = this._questModel.getNextQuestType(false);
+        }
+    }
+
+    setupPortal(left: boolean) {
         let node = left ? this._portalLeft : this._portalRight;
         let type = left ? this._leftType : this._rightType;
-        node.getChildByName("Label").setString(type);
-        let path = pathMap[type];
-        node.loadTexture("res/portal/" + path);
+        let portal = new Portal(type);
+        node.getChildByName("Label").setString(portal.name);
+        node.loadTexture(portal.imgPath);
+        if (!node.click) {
+            node.click = true;
+            node.addClickListener(() => {
+                UIManager.gotoView(portal.viewName);
+            });
+        }
     }
 
-    setTransmitType(left: boolean): EMapLevel {
-        let typeJson = left
-            ? this.transmitCfg.leftNextType
-            : this.transmitCfg.rightNextType;
-        let total = 0;
-        let transmitType: EMapLevel = left ? this._leftType : this._rightType;
-        let arr: Array<[string, number]> = [];
-        for (let type in typeJson) {
-            let probility = typeJson[type];
-            arr.push([type, probility]);
-            total += probility;
-        }
-        let random = Math.floor(Math.random() * total + 1);
-        let _probilibty = 0;
-        for (let i = 0; i < arr.length; i++) {
-            let [type, probility] = arr[i];
-            _probilibty += probility;
-            if (random <= _probilibty) {
-                transmitType = type as EMapLevel;
-                break;
-            }
-        }
-        if (left) {
-            return (this._leftType = transmitType);
-        }
-        return (this._rightType = transmitType);
-    }
-
-    setupPortal(leftType: EMapLevel, rightType: EMapLevel) {
-        let viewJson = ConfigReader.getDataByIdAndKey(
-            "TransmitConfig",
-            "transmit",
-            "viewName"
-        );
-        let arr: Array<[string, string]> = [];
-        for (let type in viewJson) {
-            let probility = viewJson[type];
-            arr.push([type, probility]);
-        }
-        for (let i = 0; i < arr.length; i++) {
-            let [type, probility] = arr[i];
-            if (type == leftType) {
-                this._leftProbility = probility;
-            }
-            if (type == rightType) {
-                this._rightProbility = probility;
-            }
-        }
-        this._portalLeft.addClickListener(() => {
-            UIManager.gotoView(this._leftProbility);
-        });
-        this._portalRight.addClickListener(() => {
-            UIManager.gotoView(this._rightProbility);
-        });
-    }
     setText() {
         this._Alice_text = [
             "你好异世界的旅者，我是爱丽丝。",

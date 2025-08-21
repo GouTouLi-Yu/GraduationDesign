@@ -1,6 +1,8 @@
 import { ClassConfig } from "../../../project/config/ClassConfig";
 import { PlayerDataManager } from "../../../project/manager/PlayerDataManager";
+import { UIManager } from "../../../project/manager/UIManager";
 import { Player } from "../../model/player/Player";
+import { EMapType } from "../../model/portal/portal";
 import { Facade } from "../Facade";
 import { GameConfig } from "./../../../project/config/GameConfig";
 
@@ -17,11 +19,35 @@ export class MainMenuFacade extends Facade {
     }
 
     enterGame() {
-        console.log("打印数据：", this._player);
-
-        // UIManager.gotoView("BattleView", {
-        //     enemyIds: ["enemy_001"],
-        // });
+        let lastMapType = this._player.lastMapType;
+        let viewName: string = "";
+        switch (lastMapType) {
+            case null: {
+                viewName = "TransmitView";
+                break;
+            }
+            case EMapType.boss: {
+            }
+            case EMapType.challenge: {
+            }
+            case EMapType.elite: {
+                viewName = "battleView";
+                break;
+            }
+            case EMapType.camp: {
+                viewName = "CampView";
+                break;
+            }
+            case EMapType.event: {
+                viewName = "EventView";
+                break;
+            }
+            case EMapType.shop: {
+                viewName = "ShopView";
+                break;
+            }
+        }
+        UIManager.gotoView(viewName);
     }
 
     opStartGame() {
@@ -37,8 +63,10 @@ export class MainMenuFacade extends Facade {
             gold: GameConfig.playerInitCfg.gold,
             cardModelData: this.getCardModelData(),
             battleModelData: this.getBattleModelData(),
+            questModelData: this.getQuestModelData(),
         };
         PlayerDataManager.saveDataToDisk(data);
+        PlayerDataManager.syncPlayerData(data);
     }
 
     private getCardModelData() {
@@ -57,10 +85,16 @@ export class MainMenuFacade extends Facade {
         };
     }
 
+    // 关卡数据
+    private getQuestModelData() {
+        return {
+            questId: GameConfig.playerInitCfg.questId,
+        };
+    }
+
     opStartNewGame() {
         this.opSaveInitData();
         this.enterGame();
-        this._player.print();
     }
 }
 ClassConfig.addClass("MainMenuFacade", MainMenuFacade);

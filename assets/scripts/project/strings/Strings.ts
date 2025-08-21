@@ -1,8 +1,9 @@
-import { ConfigReader } from "../ConfigReader/ConfigReader";
+import { stringsMap } from "./StringConstants";
 
 export class Strings {
     static get(str: string, data?: Record<string, any>): string {
-        str = ConfigReader.getDataByIdAndKey("Translate", str, "text");
+        // str = ConfigReader.getDataByIdAndKey("Translate", str, "text");
+        str = stringsMap[str];
         return this.parseTemplate(str, data);
     }
 

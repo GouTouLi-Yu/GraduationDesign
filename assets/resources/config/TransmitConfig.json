@@ -1,24 +1,32 @@
 [
   {
-    "id": "transmit",
-    "levelConfig": "TransmitLevelConfig",
-    "levelElem": [
-      1,
-      2,
-      3
-    ],
-    "imgPath": {
-      "challenge": "transmit_img_challenge",
-      "elite": "transmit_img_elite",
-      "boss": "transmit_img_boss",
-      "shop": "transmit_img_shop",
-      "event": "transmit_img_event",
-      "camp": "transmit_img_camp"
-    },
-    "viewName": {
-      "shop": "ShopView",
-      "camp": "CampView",
-      "event": "EventView"
-    }
+    "id": "challenge",
+    "imgPath": "transmit_img_challenge",
+    "viewName": "BattleView"
+  },
+  {
+    "id": "elite",
+    "imgPath": "transmit_img_elite",
+    "viewName": "BattleView"
+  },
+  {
+    "id": "boss",
+    "imgPath": "transmit_img_boss",
+    "viewName": "BattleView"
+  },
+  {
+    "id": "shop",
+    "imgPath": "transmit_img_shop",
+    "viewName": "ShopView"
+  },
+  {
+    "id": "camp",
+    "imgPath": "transmit_img_camp",
+    "viewName": "CampView"
+  },
+  {
+    "id": "event",
+    "imgPath": "transmit_img_event",
+    "viewName": "EventView"
   }
 ]

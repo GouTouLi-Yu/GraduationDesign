@@ -42,7 +42,6 @@ export class MainMenuMediator extends AreaMediator {
     setStartNewGameBtn() {
         let btn = this._layout.getChildByName("newBtn");
         btn.addClickListener(() => {
-            console.log("开始新游戏");
             this._facade.opStartNewGame();
         });
     }
@@ -50,7 +49,6 @@ export class MainMenuMediator extends AreaMediator {
     setStartGameBtn() {
         let btn = this._layout.getChildByName("continueBtn");
         btn.addClickListener(() => {
-            console.log("开始游戏");
             this._facade.opStartGame();
         });
     }

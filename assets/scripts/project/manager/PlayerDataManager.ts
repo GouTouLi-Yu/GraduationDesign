@@ -10,7 +10,6 @@ export class PlayerDataManager {
     /** 保存数据到磁盘 */
     static saveDataToDisk(data) {
         DataStore.saveObjectData(GameConfig.playerAllDataKey, data);
-        this.syncPlayerData(data);
     }
 
     /** 清空玩家所有数据（磁盘） */
