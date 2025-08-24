@@ -1,7 +1,7 @@
 import { Animation, Node } from "cc";
 import { ClassConfig } from "../../../project/config/ClassConfig";
 import { BattleCharacter } from "../../model/battle/BattleCharacter";
-import { BattleEnemyCharacter } from "../../model/battle/BattleEnemyCharacter";
+import { BattleMonsterCharacter } from "../../model/battle/BattleMonsterCharacter";
 import { Player } from "../../model/player/Player";
 
 export class CharacterPanel {
@@ -32,9 +32,9 @@ export class CharacterPanel {
     private loadImg() {
         let preFix = "res/character/enemy/mirror/";
         this._img.loadTexture(
-            preFix + (this.character as BattleEnemyCharacter).rolePicPath
+            preFix + (this.character as BattleMonsterCharacter).rolePicPath
         );
-        let str = (this.character as BattleEnemyCharacter).rolePicPath.split(
+        let str = (this.character as BattleMonsterCharacter).rolePicPath.split(
             "_"
         );
         let flip = Boolean(str[str.length - 1]);

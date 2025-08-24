@@ -1,8 +1,8 @@
 import { CommonStrategy } from "./CommonStrategy";
-import { ICSParams } from "./Strategy";
+import { IStrategyParams } from "./Strategy";
 
 export class AddShieldStrategy extends CommonStrategy {
-    constructor(params: ICSParams) {
+    constructor(params: IStrategyParams) {
         super(params);
     }
 
@@ -10,7 +10,7 @@ export class AddShieldStrategy extends CommonStrategy {
 
     setFinalValueByDebuff() {}
 
-    excute() {}
+    execute() {}
 
     end() {}
 

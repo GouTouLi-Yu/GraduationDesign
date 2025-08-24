@@ -21,6 +21,7 @@ export class MainMenuFacade extends Facade {
     enterGame() {
         let lastMapType = this._player.lastMapType;
         let viewName: string = "";
+        let data: any = {};
         switch (lastMapType) {
             case null: {
                 viewName = "TransmitView";
@@ -36,6 +37,7 @@ export class MainMenuFacade extends Facade {
             }
             case EMapType.camp: {
                 viewName = "CampView";
+                data.enemyIds = "";
                 break;
             }
             case EMapType.event: {

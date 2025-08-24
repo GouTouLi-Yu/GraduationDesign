@@ -1,14 +1,11 @@
 import { ClassConfig } from "../../../project/config/ClassConfig";
 import { ConfigReader } from "../../../project/ConfigReader/ConfigReader";
-import { BuffHelper } from "../../helper/BuffHelper";
-import { ETargetNumType } from "../battle/BattleCharacter";
-import { BattleEnemyCharacter } from "../battle/BattleEnemyCharacter";
-import { AttackStrategy } from "../strategy/AttackStrategy";
-import { ICSParams, Strategy } from "../strategy/Strategy";
+import { Skill } from "../skill/Skill";
+import { Strategy } from "../strategy/Strategy";
 import { Strings } from "./../../../project/strings/Strings";
 
 export interface IDefense {
-    excute: (val: number) => void;
+    execute: (val: number) => void;
 }
 
 export enum ECardQuality {
@@ -38,38 +35,16 @@ export class Card {
         return this.cfg.name;
     }
 
-    private _targetNumType: ETargetNumType;
-    /** 作用对象类型 */
-    get targetNumType(): ETargetNumType {
-        return this._targetNumType;
-    }
-
-    private _targets: Array<BattleEnemyCharacter>;
-
-    private get level1Segment(): Array<number> {
-        return this.cfg.level1Segment;
-    }
-    private get level2Segment(): Array<number> {
-        return this.cfg.level2Segment;
-    }
-
-    private getSegment(level?: number): number {
-        let _level = level ?? this._level;
-        if (_level == 1) {
-            return this.cfg.level1Segment;
-        }
-        return this.cfg.level2Segment ?? this.cfg.level1Segment;
-    }
+    private _skill: Skill;
 
     /** 卡牌描述 */
     get desc(): string {
         let str: string = "";
-        let descs: Array<string> = this.cfg.desc;
-        let actionIds: Array<string> = this.actionIds;
+        let descs: Array<string> = this.cfg.descs;
         let buffIds: Array<string> = this.buffIds;
         let factors = [
-            ...this.getActionFactorsByLevel(),
-            ...this.getBuffFactorsByLevel(),
+            ...this._skill.getFactors(),
+            ...this._skill.getBuffFactorsByLevel(),
         ];
         for (let i = 0; i < descs.length; i++) {
             str += Strings.get(descs[i], {
@@ -80,6 +55,10 @@ export class Card {
             }
         }
         return str;
+    }
+
+    private get skillId(): string {
+        return this.cfg.skillId;
     }
 
     get buyPrice(): number {
@@ -95,23 +74,19 @@ export class Card {
         return this._level;
     }
 
-    /** 行为id数组 */
-    private get actionIds(): Array<string> {
-        return this.cfg.actionIds;
-    }
-
     /** 策略数组, 和行为id 一一对应 */
-    private _strategise: Array<Strategy>;
+    get strategise(): Array<Strategy> {
+        let actions = this._skill.actions;
+        let arr = [];
+        for (let action of actions) {
+            arr.push(action.strategy);
+        }
+        return arr;
+    }
 
     /** 是否需要选中对象 */
     get needChooseTarget(): boolean {
         return this.cfg.needChooseTarget;
-    }
-
-    private _chooseIndex: number;
-    /** 选中的目标索引 */
-    get chooseIndex(): number {
-        return this._chooseIndex;
     }
 
     get buffIds(): Array<string> {
@@ -126,88 +101,35 @@ export class Card {
      *
      * @param {Array<BattleCharacter>} targets : 需要传全部的作用对象
      */
-    constructor(id: string, level?: number) {
+    constructor(id: string, level: number = 1) {
         this._id = id;
-        this._chooseIndex = -1;
-        this._level = level ?? 1;
-        this.setTargetType(this.cfg.targetNum);
-        this.setStrategise();
+        this._level = level;
+        this._skill = new Skill(this.skillId, this._level, -1, null, null);
     }
 
     syncData(data) {
-        if (data.targets != null) {
-            this._targets = data.targets;
-        }
         if (data.level != null) {
             this._level = data.level;
         }
-        if (data.chooseIndex != null) {
-            this._chooseIndex = data.chooseIndex;
-            for (let strategy of this._strategise) {
-                strategy.syncData(data);
-            }
-        }
     }
 
-    setTargetType(targetNum: number) {
-        if (targetNum == 999) {
-            this._targetNumType = ETargetNumType.all;
-        } else if (targetNum == 1) {
-            this._targetNumType = ETargetNumType.single;
-        } else {
-            this._targetNumType = ETargetNumType.random;
-        }
-    }
-
-    /** 获取属性值（攻击、防御、恢复等） */
-    private getActionFactorsByLevel(level?: number): Array<number> {
+    /**
+     * @description 获取属性值（攻击、防御、恢复等）
+     * @param index 第几个行为 0 ~ num - 1
+     * @param level 等级，不传默认为当前卡牌等级
+     *
+     */
+    private getFactors(index: number, level?: number): number {
         let _level = level ?? this._level;
-        return _level == 1 ? this.cfg.level1Factor : this.cfg.level2Factor;
+        return _level == 1
+            ? this.cfg.level1Factor[index]
+            : this.cfg.level2Factor[index];
     }
 
-    private getBuffFactorsByLevel(level?: number): Array<number> {
-        let arr: Array<number> = [];
-        let _level = level ?? this._level;
-        for (let buffId of this.buffIds) {
-            let factor = BuffHelper.getBuffFactor(buffId, _level);
-            arr.push(factor);
+    execute() {
+        for (let index in this.strategise) {
+            this.strategise[index].execute();
         }
-        return arr;
-    }
-
-    private setStrategise() {
-        this._strategise = [];
-        for (let i = 0; i < this.actionIds.length; i++) {
-            let actionId = this.actionIds[i];
-            switch (actionId) {
-                case EActionType.attack:
-                    let params: ICSParams = {
-                        targets: this._targets,
-                        value: this.getActionFactorsByLevel(this.level)[i],
-                        segment: this.getSegment(i),
-                        targetNumType: this.targetNumType,
-                        chooseIndex: this._chooseIndex,
-                    };
-                    let attackStrategy = new AttackStrategy(params);
-                    this._strategise.push(attackStrategy);
-                    break;
-                case EActionType.defense:
-                    break;
-                case EActionType.recover:
-                    break;
-            }
-        }
-    }
-
-    excute(targets: Array<BattleEnemyCharacter>) {
-        this._targets = targets;
-        for (let index in this._strategise) {
-            this._strategise[index].excute();
-        }
-    }
-
-    private end() {
-        this._targets = null;
     }
 }
 ClassConfig.addClass("Card", Card);

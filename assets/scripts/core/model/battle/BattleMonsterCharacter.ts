@@ -5,7 +5,7 @@ export enum EEnemyType {
     elite,
     boss,
 }
-export class BattleEnemyCharacter extends BattleCharacter {
+export class BattleMonsterCharacter extends BattleCharacter {
     private _id: string;
     get id() {
         return this._id;
@@ -30,8 +30,8 @@ export class BattleEnemyCharacter extends BattleCharacter {
     constructor(id: string) {
         super();
         this._id = id;
-        BattleEnemyCharacter.static_uuid++;
-        this._uuid = BattleEnemyCharacter.static_uuid;
+        BattleMonsterCharacter.static_uuid++;
+        this._uuid = BattleMonsterCharacter.static_uuid;
     }
     clear() {
         super.clear();

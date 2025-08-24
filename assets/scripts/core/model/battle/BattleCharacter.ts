@@ -13,9 +13,9 @@ export enum ECharacterAttrKey {
 }
 
 export enum ETargetNumType {
-    single,
-    random,
-    all,
+    single = 1,
+    random = 0,
+    all = 999,
 }
 
 export interface ICharacterHurtParams {

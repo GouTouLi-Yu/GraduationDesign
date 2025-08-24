@@ -13,7 +13,7 @@ import { Injector } from "../../../project/Injector/Injector";
 import { BattleFacade } from "../../controller/battle/BattleFacade";
 import { MathHelper } from "../../helper/MathHelper";
 import { BattleCharacter } from "../../model/battle/BattleCharacter";
-import { BattleEnemyCharacter } from "../../model/battle/BattleEnemyCharacter";
+import { BattleMonsterCharacter } from "../../model/battle/BattleMonsterCharacter";
 import { Card } from "../../model/card/Card";
 import { Player } from "../../model/player/Player";
 import { AreaMediator } from "../AreaMediator";
@@ -124,7 +124,7 @@ export class BattleMediator extends AreaMediator {
 
     getPanelByUuid(id: number): CharacterPanel {
         return this._enemiePanels.find((panel) => () => {
-            let enemy = panel.character as BattleEnemyCharacter;
+            let enemy = panel.character as BattleMonsterCharacter;
             return enemy.uuid == id;
         });
     }
@@ -135,7 +135,7 @@ export class BattleMediator extends AreaMediator {
             this,
             (params) => {
                 let charcter = params.character as BattleCharacter;
-                if (charcter instanceof BattleEnemyCharacter) {
+                if (charcter instanceof BattleMonsterCharacter) {
                     let panel = this.getPanelByUuid(charcter.uuid);
                     panel.hurtForHp(params.damage, params.segment);
                 } else {
@@ -161,7 +161,7 @@ export class BattleMediator extends AreaMediator {
         let enemiesNode = this.view.getChildByName("enemies");
         for (let i = 0; i < enemyIds.length; i++) {
             let enemyId = enemyIds[i];
-            let enemy = new BattleEnemyCharacter(enemyId);
+            let enemy = new BattleMonsterCharacter(enemyId);
             let enemyNode = this._enemyTempNode.clone();
             enemyNode.active = true;
             enemyNode.setPositionCC(new Vec2(0, 0));
@@ -325,10 +325,10 @@ export class BattleMediator extends AreaMediator {
         this._chooseEnemyIndex = -1;
     }
 
-    get enemies(): Array<BattleEnemyCharacter> {
-        let arr = new Array<BattleEnemyCharacter>();
+    get enemies(): Array<BattleMonsterCharacter> {
+        let arr = new Array<BattleMonsterCharacter>();
         for (let panel of this._enemiePanels) {
-            arr.push(panel.character as BattleEnemyCharacter);
+            arr.push(panel.character as BattleMonsterCharacter);
         }
         return arr;
     }

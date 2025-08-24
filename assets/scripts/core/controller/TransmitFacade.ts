@@ -1,6 +1,7 @@
 import { ClassConfig } from "../../project/config/ClassConfig";
 import { ConfigReader } from "../../project/ConfigReader/ConfigReader";
-import { BattleEnemyCharacter } from "../model/battle/BattleEnemyCharacter";
+import { BattleMonsterCharacter } from "../model/battle/BattleMonsterCharacter";
+
 import { Facade } from "./Facade";
 
 export class TransmitFacade extends Facade {
@@ -15,7 +16,7 @@ export class TransmitFacade extends Facade {
             "enemyIds"
         );
         let enemyTeam = enemyIds.map((id) => {
-            let enemy = new BattleEnemyCharacter(id);
+            let enemy = new BattleMonsterCharacter(id);
             enemy.syncData({
                 id,
             });

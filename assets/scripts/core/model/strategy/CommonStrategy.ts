@@ -1,25 +1,13 @@
 import { _decorator } from "cc";
 import { BattleCharacter, ETargetNumType } from "../battle/BattleCharacter";
-import { ICSParams, Strategy } from "./Strategy";
+import { IStrategyParams, Strategy } from "./Strategy";
 const { ccclass, property } = _decorator;
 
 export abstract class CommonStrategy extends Strategy {
-    private _chooseIndex: number;
-    private _targetType: ETargetNumType;
-
-    protected _segment: number;
-    protected _value: number;
-
     protected _changeFunc: (target: BattleCharacter, segment: number) => void;
-    protected _params: any;
 
-    constructor(params: ICSParams) {
+    constructor(params: IStrategyParams) {
         super(params);
-        this._value = params.value;
-        this._targets = params.targets;
-        this._segment = params.segment;
-        this._chooseIndex = params.chooseIndex;
-        this._targetType = params.targetNumType;
     }
 
     setFinalValue() {
@@ -27,21 +15,19 @@ export abstract class CommonStrategy extends Strategy {
         this.setFinalValueByDebuff();
     }
 
-    syncData(data: ICSParams) {
-        if (data.chooseIndex != null) {
-            this._chooseIndex = data.chooseIndex;
+    syncData(data) {
+        if (!data) {
+            return;
         }
-        if (data.targets != null) {
-            this._targets = data.targets;
-        }
+        super.syncData(data);
     }
 
-    excute() {
+    execute() {
         this.setFinalValue();
-        if (this._targetType == ETargetNumType.random) {
-            this.excuteByRandom();
+        if (this._targetNumType == ETargetNumType.random) {
+            this.executeByRandom();
         } else {
-            this.excuteBySingleAndAll();
+            this.executeBySingleAndAll();
         }
     }
 
@@ -49,32 +35,30 @@ export abstract class CommonStrategy extends Strategy {
 
     abstract setFinalValueByBuff();
 
-    private excuteByRandom() {
-        let segments = new Array<number>(this._targets.length);
+    private executeByRandom() {
+        let segments = new Array<number>(this._monsters.length);
         segments.fill(0);
         for (let i = 0; i < this._segment; i++) {
-            let index = Math.floor(Math.random() * this._targets.length);
+            let index = Math.floor(Math.random() * this._monsters.length);
             segments[index]++;
         }
-        for (let i = 0; i < this._targets.length; i++) {
-            let target = this._targets[i];
+        for (let i = 0; i < this._monsters.length; i++) {
+            let target = this._monsters[i];
             let segment = segments[i];
             if (segment > 0) {
-                this._changeFunc(this._targets[i], segment);
+                this._changeFunc(this._monsters[i], segment);
             }
         }
     }
 
-    private excuteBySingleAndAll() {
+    private executeBySingleAndAll() {
         if (this._chooseIndex != null) {
-            let target = this._targets[this._chooseIndex];
+            let target = this._monsters[this._chooseIndex];
             this._changeFunc(target, this._segment);
         } else {
-            for (let target of this._targets) {
+            for (let target of this._monsters) {
                 this._changeFunc(target, this._segment);
             }
         }
     }
-
-    end() {}
 }

@@ -1,5 +1,5 @@
 import { Model } from "../Model";
-import { BattleEnemyCharacter } from "./BattleEnemyCharacter";
+import { BattleMonsterCharacter } from "./BattleMonsterCharacter";
 import { BattlePlayerCharacter } from "./BattlePlayerCharacter";
 
 export class BattleModel extends Model {
@@ -8,13 +8,13 @@ export class BattleModel extends Model {
         return this._battlePlayerCharacter;
     }
 
-    private _battleEnemyCharacters: Map<number, BattleEnemyCharacter>;
+    private _battleMonsterCharacters: Map<number, BattleMonsterCharacter>;
     get battleEnemyCharacters() {
-        return this._battleEnemyCharacters;
+        return this._battleMonsterCharacters;
     }
 
     initialize() {
-        this._battleEnemyCharacters = new Map();
+        this._battleMonsterCharacters = new Map();
         this._battlePlayerCharacter = new BattlePlayerCharacter();
     }
 
@@ -25,13 +25,18 @@ export class BattleModel extends Model {
         if (data.enemyCharacters != null) {
             let enemyCharacters = data.enemyCharacters;
             for (let i = 0; i < enemyCharacters.length; i++) {
-                let enemyCharacter = enemyCharacters[i] as BattleEnemyCharacter;
-                let enemy = this._battleEnemyCharacters.get(
+                let enemyCharacter = enemyCharacters[
+                    i
+                ] as BattleMonsterCharacter;
+                let enemy = this._battleMonsterCharacters.get(
                     enemyCharacter.uuid
                 );
                 if (!enemy) {
-                    enemy = new BattleEnemyCharacter(enemyCharacter.id);
-                    this._battleEnemyCharacters.set(enemyCharacter.uuid, enemy);
+                    enemy = new BattleMonsterCharacter(enemyCharacter.id);
+                    this._battleMonsterCharacters.set(
+                        enemyCharacter.uuid,
+                        enemy
+                    );
                 }
                 enemy.syncData(enemyCharacter);
             }
