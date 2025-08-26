@@ -75,5 +75,9 @@ export class CardModel {
         }
         return cardIds;
     }
+
+    clear() {
+        this._cards.length = 0;
+    }
 }
 ClassConfig.addClass("CardModel", CardModel);

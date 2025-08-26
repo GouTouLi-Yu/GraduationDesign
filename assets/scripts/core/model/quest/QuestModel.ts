@@ -4,10 +4,31 @@ import { Model } from "../Model";
 import { EMapType } from "../portal/portal";
 
 export class QuestModel extends Model {
-    private _questId: string;
+    private _quest: number = 1;
+    get quest() {
+        return this._quest;
+    }
+
+    private _leftPotalType: EMapType;
+    get leftPotalType() {
+        return this._leftPotalType;
+    }
+
+    private _rightPotalType: EMapType;
+    get rightPotalType() {
+        return this._rightPotalType;
+    }
+
+    private _curMapType: EMapType = EMapType.transmit;
+    get curMapType() {
+        return this._curMapType;
+    }
 
     private get cfg() {
-        return ConfigReader.getDataById("TransmitLevelConfig", this._questId);
+        return ConfigReader.getDataById(
+            "TransmitLevelConfig",
+            this._quest.toString()
+        );
     }
 
     /**
@@ -39,12 +60,28 @@ export class QuestModel extends Model {
 
     syncData(data: any) {
         if (data.questId != null) {
-            this._questId = data.questId;
+            this._quest = data.questId;
+        }
+        if (data.leftPotalType != null) {
+            this._leftPotalType = data.leftPotalType;
+        }
+        if (data.rightPotalType != null) {
+            this._rightPotalType = data.rightPotalType;
+        }
+        if (data.curMapType != null) {
+            this._curMapType = data.curMapType;
         }
     }
 
     syncDelData(data: any) {}
 
     initialize() {}
+
+    clear() {
+        this._quest = 1;
+        this._leftPotalType = null;
+        this._rightPotalType = null;
+        this._curMapType = EMapType.transmit;
+    }
 }
 ClassConfig.addClass("QuestModel", QuestModel);

@@ -14,10 +14,15 @@ export enum EMapType {
     shop = "shop",
     /** 营地 */
     camp = "camp",
+    /** 传送门 */
+    transmit = "transmit",
 }
 
 export class Portal {
     private _type: EMapType;
+    get type() {
+        return this._type;
+    }
 
     private get cfg() {
         return ConfigReader.getDataById("TransmitConfig", this._type);

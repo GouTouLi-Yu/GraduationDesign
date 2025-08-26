@@ -8,6 +8,7 @@ import {
     Vec3,
 } from "cc";
 import { ClassConfig } from "../../../project/config/ClassConfig";
+import { ConfigReader } from "../../../project/ConfigReader/ConfigReader";
 import { PCEventType } from "../../../project/event/EventType";
 import { Injector } from "../../../project/Injector/Injector";
 import { BattleFacade } from "../../controller/battle/BattleFacade";
@@ -18,10 +19,6 @@ import { Card } from "../../model/card/Card";
 import { Player } from "../../model/player/Player";
 import { AreaMediator } from "../AreaMediator";
 import { CharacterPanel } from "../character/CharacterPanel";
-
-export interface IBattleData {
-    enemyIds: Array<string>;
-}
 
 /**
  * 可优化：
@@ -144,14 +141,19 @@ export class BattleMediator extends AreaMediator {
         );
     }
 
-    enterWithData(data: IBattleData): void {
+    enterWithData(data): void {
         super.enterWithData(data);
         if (!data) {
             console.error("进入战斗界面时，没有传任何数据!");
             return;
         }
-        if (data.enemyIds) {
-            this.initEnemy(data.enemyIds);
+        if (data.teamId) {
+            let enemyIds = ConfigReader.getDataByIdAndKey(
+                "EnemyTeamConfig",
+                "id",
+                "enemyIds"
+            );
+            this.initEnemy(enemyIds);
         }
         this.setupView();
     }

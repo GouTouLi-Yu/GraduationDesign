@@ -20,6 +20,7 @@ export class DataStore {
 
     static saveObjectData(key: string, value: Object) {
         let jsonStr = JSON.stringify(value);
+        console.log("向磁盘保存数据：", value);
         sys.localStorage.setItem(key, jsonStr);
     }
 

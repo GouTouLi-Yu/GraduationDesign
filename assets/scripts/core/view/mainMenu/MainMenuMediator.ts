@@ -2,6 +2,7 @@ import { Node } from "cc";
 import { ClassConfig } from "../../../project/config/ClassConfig";
 import { PCEventType } from "../../../project/event/EventType";
 import { Injector } from "../../../project/Injector/Injector";
+import { PlayerDataManager } from "../../../project/manager/PlayerDataManager";
 import { MainMenuFacade } from "../../controller/mainMenu/MainMenuFacade";
 import { AreaMediator } from "../AreaMediator";
 import { EMediatorDisposeType } from "../Mediator";
@@ -37,6 +38,14 @@ export class MainMenuMediator extends AreaMediator {
     setupView() {
         this.setStartNewGameBtn();
         this.setStartGameBtn();
+        this.setClearBtn();
+    }
+
+    setClearBtn() {
+        let btn = this._layout.getChildByName("clearBtn");
+        btn.addClickListener(() => {
+            PlayerDataManager.clearPlayerAllDataFromDisk();
+        });
     }
 
     setStartNewGameBtn() {

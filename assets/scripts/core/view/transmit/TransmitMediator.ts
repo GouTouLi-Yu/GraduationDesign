@@ -2,11 +2,12 @@ import { Node } from "cc";
 import { ClassConfig } from "../../../project/config/ClassConfig";
 import { ConfigReader } from "../../../project/ConfigReader/ConfigReader";
 import { PCEventType } from "../../../project/event/EventType";
-import { UIManager } from "../../../project/manager/UIManager";
+import { Injector } from "../../../project/Injector/Injector";
 import { TypewriterEffect } from "../../../UIComponent/TypeWriter";
+import { TransmitFacade } from "../../controller/TransmitFacade";
 import { QuestHelper } from "../../helper/QuestHelper";
 import { Player } from "../../model/player/Player";
-import { EMapType, Portal } from "../../model/portal/portal";
+import { Portal } from "../../model/portal/portal";
 import { QuestModel } from "../../model/quest/QuestModel";
 import { AreaMediator } from "../AreaMediator";
 
@@ -18,20 +19,18 @@ export class TransmitMediator extends AreaMediator {
     private _typeWriter: TypewriterEffect;
     private _chatEndNode: Node;
     private _textBgNode: Node;
-    //********************************************************** */
     private _currentIndex: number = 0;
     private _Alice_text: Array<string>;
     private _portalLeft: Node;
     private _portalRight: Node;
-    private _leftType: EMapType;
-    private _rightType: EMapType;
     private _questModel: QuestModel;
-    //********************************************************** */
+    private _facade: TransmitFacade;
     initialize() {
         super.initialize();
         this._player = Player.instance;
         this.setText();
         this._questModel = this._player.questModel;
+        this._facade = Injector.getInstance(TransmitFacade);
     }
 
     onRegister() {
@@ -76,30 +75,26 @@ export class TransmitMediator extends AreaMediator {
     }
 
     setTransmit(left: boolean) {
-        this.setTransmitType(left);
-        this.setTransmitType(!left);
         this.setupPortal(left);
         this.setupPortal(!left);
     }
 
-    setTransmitType(left: boolean) {
-        if (left) {
-            this._leftType = this._questModel.getNextQuestType(true);
-        } else {
-            this._rightType = this._questModel.getNextQuestType(false);
-        }
+    private get questModel(): QuestModel {
+        return this._player.questModel;
     }
 
     setupPortal(left: boolean) {
         let node = left ? this._portalLeft : this._portalRight;
-        let type = left ? this._leftType : this._rightType;
+        let type = left
+            ? this.questModel.leftPotalType
+            : this.questModel.rightPotalType;
         let portal = new Portal(type);
         node.getChildByName("Label").setString(portal.name);
         node.loadTexture(portal.imgPath);
         if (!node.click) {
             node.click = true;
             node.addClickListener(() => {
-                UIManager.gotoView(portal.viewName);
+                this._facade.opUsePortal(portal);
             });
         }
     }

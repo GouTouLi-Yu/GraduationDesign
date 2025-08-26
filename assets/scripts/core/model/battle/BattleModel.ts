@@ -3,6 +3,12 @@ import { BattleMonsterCharacter } from "./BattleMonsterCharacter";
 import { BattlePlayerCharacter } from "./BattlePlayerCharacter";
 
 export class BattleModel extends Model {
+    private _enemyTeamId: string;
+    /** 敌人队伍id --> 对应 EnemyTeamConfig表 */
+    get enemyTeamId() {
+        return this._enemyTeamId;
+    }
+
     private _battlePlayerCharacter: BattlePlayerCharacter;
     get battlePlayerCharacter() {
         return this._battlePlayerCharacter;
@@ -22,26 +28,15 @@ export class BattleModel extends Model {
         if (data.playerCharacter != null) {
             this._battlePlayerCharacter.syncData(data.playerCharacter);
         }
-        if (data.enemyCharacters != null) {
-            let enemyCharacters = data.enemyCharacters;
-            for (let i = 0; i < enemyCharacters.length; i++) {
-                let enemyCharacter = enemyCharacters[
-                    i
-                ] as BattleMonsterCharacter;
-                let enemy = this._battleMonsterCharacters.get(
-                    enemyCharacter.uuid
-                );
-                if (!enemy) {
-                    enemy = new BattleMonsterCharacter(enemyCharacter.id);
-                    this._battleMonsterCharacters.set(
-                        enemyCharacter.uuid,
-                        enemy
-                    );
-                }
-                enemy.syncData(enemyCharacter);
-            }
+        if (data.teamId != null) {
+            this._enemyTeamId = data.teamId;
         }
     }
 
     syncDelData(data) {}
+
+    clear() {
+        this._battlePlayerCharacter.clear();
+        this._battleMonsterCharacters.clear();
+    }
 }

@@ -2,7 +2,7 @@ import { ClassConfig } from "../../../project/config/ClassConfig";
 import { PlayerDataManager } from "../../../project/manager/PlayerDataManager";
 import { UIManager } from "../../../project/manager/UIManager";
 import { Player } from "../../model/player/Player";
-import { EMapType } from "../../model/portal/portal";
+import { EMapType, Portal } from "../../model/portal/portal";
 import { Facade } from "../Facade";
 import { GameConfig } from "./../../../project/config/GameConfig";
 
@@ -18,44 +18,32 @@ export class MainMenuFacade extends Facade {
         PlayerDataManager.clearPlayerAllDataFromDisk();
     }
 
-    enterGame() {
-        let lastMapType = this._player.lastMapType;
-        let viewName: string = "";
+    gotoCurMap() {
         let data: any = {};
-        switch (lastMapType) {
-            case null: {
-                viewName = "TransmitView";
-                break;
-            }
-            case EMapType.boss: {
-            }
-            case EMapType.challenge: {
-            }
-            case EMapType.elite: {
-                viewName = "battleView";
-                break;
-            }
-            case EMapType.camp: {
-                viewName = "CampView";
-                data.enemyIds = "";
-                break;
-            }
-            case EMapType.event: {
-                viewName = "EventView";
-                break;
-            }
-            case EMapType.shop: {
-                viewName = "ShopView";
-                break;
+        let mapType = this._player.questModel.curMapType;
+        let portal = new Portal(mapType);
+        let questModel = this._player.questModel;
+        switch (mapType) {
+            case EMapType.transmit: {
+                if (!questModel.leftPotalType && !questModel.rightPotalType) {
+                    let leftPotalType = questModel.getNextQuestType(true);
+                    let rightPotalType = questModel.getNextQuestType(false);
+                    PlayerDataManager.saveDataToDisk({
+                        questModelData: {
+                            leftPotalType: leftPotalType,
+                            rightPotalType: rightPotalType,
+                        },
+                    });
+                }
             }
         }
-        UIManager.gotoView(viewName);
+        UIManager.gotoView(portal.viewName, data);
     }
 
     opStartGame() {
         let data = PlayerDataManager.getPlayerDataFromDisk();
         this._player.syncData(data);
-        this.enterGame();
+        this.gotoCurMap();
     }
 
     /** 向磁盘存储新游戏的玩家初始数据, 如最开始的五张卡和宝物等 */
@@ -68,7 +56,6 @@ export class MainMenuFacade extends Facade {
             questModelData: this.getQuestModelData(),
         };
         PlayerDataManager.saveDataToDisk(data);
-        PlayerDataManager.syncPlayerData(data);
     }
 
     private getCardModelData() {
@@ -96,7 +83,7 @@ export class MainMenuFacade extends Facade {
 
     opStartNewGame() {
         this.opSaveInitData();
-        this.enterGame();
+        this.gotoCurMap();
     }
 }
 ClassConfig.addClass("MainMenuFacade", MainMenuFacade);
