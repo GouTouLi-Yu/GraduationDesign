@@ -1,5 +1,6 @@
 import { ClassConfig } from "../../project/config/ClassConfig";
 import { ConfigReader } from "../../project/ConfigReader/ConfigReader";
+import { PlayerDataManager } from "../../project/manager/PlayerDataManager";
 import { UIManager } from "../../project/manager/UIManager";
 import { BattleHelper } from "../helper/BattleHelper";
 import { BattleMonsterCharacter } from "../model/battle/BattleMonsterCharacter";
@@ -42,13 +43,49 @@ export class TransmitFacade extends Facade {
             case EMapType.boss: {
                 let teamId = BattleHelper.getEnemyTeamIdByMapType(portal.type);
                 data.teamId = teamId;
-                // PlayerDataManager.syncPlayerData({
-                //     battleModelData: data,
-                // });
+                break;
+            }
+            case EMapType.shop: {
+                break;
+            }
+            case EMapType.camp: {
+                break;
+            }
+            case EMapType.event: {
                 break;
             }
         }
+        this.opSyncData(portal.type, data);
         UIManager.gotoView(portal.viewName, data);
+    }
+
+    opSyncData(type: EMapType, _data: any) {
+        let data: any = {};
+        switch (type) {
+            case EMapType.challenge: {
+            }
+            case EMapType.elite: {
+            }
+            case EMapType.boss: {
+                data.battleModelData = {
+                    teamId: _data.teamId,
+                };
+                break;
+            }
+            case EMapType.shop: {
+                break;
+            }
+            case EMapType.camp: {
+                break;
+            }
+            case EMapType.event: {
+                break;
+            }
+        }
+        data.questModelData = {
+            curMapType: type,
+        };
+        PlayerDataManager.syncPlayerData(data);
     }
 }
 ClassConfig.addClass("TransmitFacade", TransmitFacade);

@@ -28,5 +28,10 @@
     "id": "event",
     "imgPath": "transmit_img_event",
     "viewName": "EventView"
+  },
+  {
+    "id": "transmit",
+    "imgPath": null,
+    "viewName": "TransmitView"
   }
 ]

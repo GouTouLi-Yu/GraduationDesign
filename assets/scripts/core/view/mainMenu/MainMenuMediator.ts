@@ -39,7 +39,10 @@ export class MainMenuMediator extends AreaMediator {
         this.setStartNewGameBtn();
         this.setStartGameBtn();
         this.setClearBtn();
+        this.test();
     }
+
+    test() {}
 
     setClearBtn() {
         let btn = this._layout.getChildByName("clearBtn");

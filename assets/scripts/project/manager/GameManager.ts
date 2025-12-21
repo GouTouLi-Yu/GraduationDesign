@@ -25,6 +25,7 @@ export class GameManager {
     }
 
     static startGame() {
-        UIManager.gotoView("MainMenuView");
+        // UIManager.gotoView("MainMenuView");
+        UIManager.gotoView("TestView");
     }
 }

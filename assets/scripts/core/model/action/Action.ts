@@ -23,6 +23,7 @@ export class Action {
     constructor(id: string, params: IStrategyParams) {
         this._id = id;
         this._type = id as EActionType;
+        this._strategy = this.setStrategy(params);
     }
 
     syncData(data) {

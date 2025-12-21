@@ -18,7 +18,7 @@ import { BattleMonsterCharacter } from "../../model/battle/BattleMonsterCharacte
 import { Card } from "../../model/card/Card";
 import { Player } from "../../model/player/Player";
 import { AreaMediator } from "../AreaMediator";
-import { CharacterPanel } from "../character/CharacterPanel";
+import { CharacterPanel, EEnemyAnimType } from "../character/CharacterPanel";
 
 /**
  * 可优化：
@@ -45,7 +45,7 @@ export class BattleMediator extends AreaMediator {
     private _enemiesNode: Array<Node>;
     private _enemiePanels: Array<CharacterPanel>;
     private _movingCard: Card;
-    private _chooseEnemyIndex: number = 0;
+    private _chooseEnemyIndex: number = -1;
     private _facade: BattleFacade;
     private _enemyTempNode: Node;
 
@@ -150,7 +150,7 @@ export class BattleMediator extends AreaMediator {
         if (data.teamId) {
             let enemyIds = ConfigReader.getDataByIdAndKey(
                 "EnemyTeamConfig",
-                "id",
+                data.teamId,
                 "enemyIds"
             );
             this.initEnemy(enemyIds);
@@ -304,10 +304,6 @@ export class BattleMediator extends AreaMediator {
         );
     }
 
-    onTouchMove(event: EventTouch) {
-        this.moveCard(event);
-    }
-
     recoverCard() {
         let index = this._movingCardNode.index;
         this._movingCardNode.setPositionY(this.getCardPosY(index));
@@ -346,6 +342,34 @@ export class BattleMediator extends AreaMediator {
         this.refreshCards();
     }
 
+    chooseEnemy(mousePos: Vec2, index: number) {
+        return MathHelper.isInNodeByWorld(
+            mousePos,
+            this._enemiesNode[index].getChildByName("img")
+        );
+    }
+
+    onTouchMove(event: EventTouch) {
+        this.moveCard(event);
+        let mousePos = event.getUILocation();
+        for (let i = 0; i < this._enemiesNode.length; i++) {
+            if (this.chooseEnemy(mousePos, i)) {
+                this._chooseEnemyIndex = i;
+                break;
+            }
+        }
+        if (this._chooseEnemyIndex != -1) {
+            this._enemiePanels[this._chooseEnemyIndex].playAnim(
+                EEnemyAnimType.choosing
+            );
+        } else {
+            this._enemiePanels[this._chooseEnemyIndex].playAnim(
+                EEnemyAnimType.idle
+            );
+            this._chooseEnemyIndex = -1;
+        }
+    }
+
     onTouchEnd(event: EventTouch) {
         if (!this._movingCardNode) {
             return;
@@ -359,13 +383,7 @@ export class BattleMediator extends AreaMediator {
             // 需要选中目标
             if (this._movingCard.needChooseTarget) {
                 for (let i = 0; i < this._enemiesNode.length; i++) {
-                    let enemyNode = this._enemiesNode[i];
-                    if (
-                        MathHelper.isInNodeByWorld(
-                            mousePos,
-                            enemyNode.getChildByName("img")
-                        )
-                    ) {
+                    if (this.chooseEnemy(mousePos, i)) {
                         // 碰到了敌人
                         this._showCards.splice(index, 1);
                         this._chooseEnemyIndex = i;

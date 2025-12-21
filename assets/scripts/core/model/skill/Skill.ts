@@ -82,6 +82,9 @@ export class Skill {
 
     getBuffFactorsByLevel(level?: number): Array<number> {
         let arr: Array<number> = [];
+        if (!this.buffsId || this.buffsId.length == 0) {
+            return arr;
+        }
         let _level = level ?? this._level;
         for (let buffId of this.buffsId) {
             let factor = BuffHelper.getBuffFactor(buffId, _level);

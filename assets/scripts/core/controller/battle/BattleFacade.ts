@@ -21,7 +21,7 @@ export class BattleFacade extends Facade {
         let data = {
             chooseIndex: chooseIndex,
             monsters: monsters,
-            executor: Player.instance,
+            executor: Player.instance.battlePlayerCharacter,
         };
         for (let strategy of card.strategise) {
             strategy.syncData(data);

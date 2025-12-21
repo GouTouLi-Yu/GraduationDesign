@@ -76,11 +76,13 @@ export class BattleCharacter {
     addAttrKeyVal(key: ECharacterAttrKey, val: number) {
         let attr = this.getAttr(key);
         attr += val;
+        this["_" + key] = attr;
     }
 
     reduceAttrKeyVal(key: ECharacterAttrKey, val: number) {
         let attr = this.getAttr(key);
         attr -= val;
+        this["_" + key] = attr;
     }
 
     addBuff(buff: Buff) {

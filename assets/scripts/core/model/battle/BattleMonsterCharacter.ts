@@ -32,6 +32,8 @@ export class BattleMonsterCharacter extends BattleCharacter {
         this._id = id;
         BattleMonsterCharacter.static_uuid++;
         this._uuid = BattleMonsterCharacter.static_uuid;
+        this._hp = this.cfg.hp;
+        this._remainHp = this._hp;
     }
     clear() {
         super.clear();
