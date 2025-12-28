@@ -18,7 +18,7 @@ export enum EMediatorDisposeType {
 export abstract class Mediator extends EventObject {
     type: EMediatorType;
     fullPath: string = "";
-    view: Node;
+    view: Node | null = null;
     disposeType: EMediatorDisposeType = EMediatorDisposeType.shortTime;
     protected _intervalId: number = 0;
 
@@ -35,11 +35,13 @@ export abstract class Mediator extends EventObject {
     }
 
     _dipose() {
-        let prefab: Prefab = this.view.prefab;
-        // MyResManager.printAssetInfo();
-        // AssetManager.instance.releaseAsset(prefab);
-        this.view.destroy();
-        this.view = null;
+        if (this.view) {
+            let prefab: Prefab = this.view.prefab;
+            // MyResManager.printAssetInfo();
+            // AssetManager.instance.releaseAsset(prefab);
+            this.view.destroy();
+            this.view = null;
+        }
         this.removeAllListeners();
         Injector.delete(typeof this);
         super.dispose();

@@ -11,12 +11,17 @@ export class Injector {
      */
     static getInstance<T extends new (...args: any) => any>(
         classType: T | string
-    ): InstanceType<T> {
+    ): InstanceType<T> | null {
         let _class = this.classMap.get(classType);
         if (!_class) {
             // 如果传的是字符串, 从classConfig中获取类型, 然后调用构造函数
             if (typeof classType == "string") {
-                _class = new (ClassConfig.getClass(classType))();
+                const ClassConstructor = ClassConfig.getClass(classType);
+                if (!ClassConstructor) {
+                    console.error(`[Injector] Class ${classType} not found in ClassConfig`);
+                    return null;
+                }
+                _class = new ClassConstructor();
                 _class.initialize?.();
             } else {
                 // 传的是构造函数 --> 直接调用构造函数

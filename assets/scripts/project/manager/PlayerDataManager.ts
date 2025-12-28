@@ -1,31 +1,23 @@
-import { Player } from "../../core/model/player/Player";
 import { GameConfig } from "../config/GameConfig";
 import { DataStore } from "../dataStore/DataStore";
 
 export class PlayerDataManager {
-    static get player() {
-        return Player.instance;
-    }
-    static syncPlayerData(data) {
-        this.player.syncData(data);
-    }
-
     /** 保存数据到磁盘 */
-    static saveDataToDisk(data) {
-        DataStore.saveObjectData(GameConfig.playerAllDataKey, data);
-        this.syncPlayerData(data);
+    static saveDataToDisk(data: any, key?: string) {
+        const dataKey = key || GameConfig.playerAllDataKey;
+        DataStore.saveObjectData(dataKey, data);
     }
 
     /** 清空玩家所有数据（磁盘） */
-    static clearPlayerAllDataFromDisk() {
-        DataStore.removeData(GameConfig.playerAllDataKey);
-        this.player.clear();
-        console.log("清理后的玩家数据为：", this.player);
+    static clearPlayerAllDataFromDisk(key?: string) {
+        const dataKey = key || GameConfig.playerAllDataKey;
+        DataStore.removeData(dataKey);
     }
 
     /** 从磁盘获取玩家数据 */
-    static getPlayerDataFromDisk() {
-        let data = DataStore.getObjectData(GameConfig.playerAllDataKey);
+    static getPlayerDataFromDisk(key?: string) {
+        const dataKey = key || GameConfig.playerAllDataKey;
+        let data = DataStore.getObjectData(dataKey);
         return data;
     }
 }

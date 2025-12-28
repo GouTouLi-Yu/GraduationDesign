@@ -23,9 +23,9 @@ export class UIManager {
      * @param viewName 界面名字, 必须是view结尾
      * @param params
      */
-    static gotoView(viewName: string, params?: any): Promise<Node> {
+    static gotoView(viewName: string, params?: any): Promise<Node | null> {
         if (this._isGoing) {
-            return;
+            return Promise.resolve(null);
         }
         this._isGoing = true;
         // 传进来MainMenuView
@@ -36,30 +36,49 @@ export class UIManager {
         let mediator: Mediator = ClassConfig.getClass(mediatorName);
         if (!mediator) {
             console.error(`${mediatorName} not found in ClassConfig`);
-            return;
+            this._isGoing = false;
+            return Promise.resolve(null);
         }
         let layerPath = mediator.fullPath + layerName;
-        let PromiseNode: Promise<Node> = MyResManager.loadPrefab(layerPath);
+        let PromiseNode: Promise<Node | null> = MyResManager.loadPrefab(layerPath);
         let parentNode: Node;
         // 实例化对象
         mediator = Injector.getInstance(mediatorName);
-        PromiseNode.then((node: Node) => {
+        return PromiseNode.then((node: Node | null) => {
+            if (!node) {
+                console.error(`[UIManager] Failed to load prefab: ${layerPath}`);
+                this._isGoing = false;
+                return null;
+            }
             if (mediator.type == EMediatorType.popup) {
                 parentNode = SceneManager.popupLayer;
             } else {
                 parentNode = SceneManager.areaLayer;
             }
+            if (!parentNode) {
+                console.error(`[UIManager] Failed to get parent node for ${viewName}`);
+                this._isGoing = false;
+                return null;
+            }
             parentNode.addChildCC(node);
             return node;
         })
-            .then((node: Node) => {
+            .then((node: Node | null) => {
+                if (!node) {
+                    this._isGoing = false;
+                    return null;
+                }
                 mediator.view = node;
                 // mediator.initialize();
                 mediator.onRegister();
                 mediator.enterWithData(params);
-                return PromiseNode;
+                return node;
             })
-            .then(() => {
+            .then((node: Node | null) => {
+                if (!node) {
+                    this._isGoing = false;
+                    return null;
+                }
                 if (mediator.type == EMediatorType.popup) {
                     this.popupViewOpenedMap.set(viewName, mediator);
                 } else {
@@ -70,9 +89,13 @@ export class UIManager {
                     }
                     this.areaViewOpenedMap.set(viewName, mediator);
                 }
-            })
-            .then(() => {
                 this._isGoing = false;
+                return node;
+            })
+            .catch((error) => {
+                console.error(`[UIManager] Error loading view ${viewName}:`, error);
+                this._isGoing = false;
+                return null;
             });
     }
 

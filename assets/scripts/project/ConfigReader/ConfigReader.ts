@@ -66,7 +66,11 @@ export class ConfigReader {
         return this.deepFreeze(table.get(id));
     }
 
-    static getAllId(tableName: string): IterableIterator<string> {
+    static getAllId(tableName: string): IterableIterator<string> | undefined {
         return this._configMap.get(tableName)?.keys();
+    }
+
+    static getData(tableName: string): Map<string, any> | undefined {
+        return this._configMap.get(tableName);
     }
 }

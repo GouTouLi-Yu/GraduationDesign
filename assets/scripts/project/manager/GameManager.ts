@@ -1,12 +1,8 @@
 import { director } from "cc";
-import { Player } from "./../../core/model/player/Player";
 import { UIManager } from "./UIManager";
 
 export class GameManager {
-    private static _player: Player;
     static init() {
-        Player.instance.initialize();
-        this._player = Player.instance;
         this.addGlobalTimer();
     }
 
@@ -25,7 +21,7 @@ export class GameManager {
     }
 
     static startGame() {
-        // UIManager.gotoView("MainMenuView");
-        UIManager.gotoView("TestView");
+        // 游戏启动逻辑，由具体游戏实现
+        // UIManager.gotoView("YourView");
     }
 }

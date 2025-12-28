@@ -1,6 +1,4 @@
-import { _decorator } from "cc";
 import { EventObject } from "../event/EventObject";
-const { ccclass, property } = _decorator;
 
 export class EventManager {
     static eventMap: Map<number, Map<EventObject, EventTarget>>;

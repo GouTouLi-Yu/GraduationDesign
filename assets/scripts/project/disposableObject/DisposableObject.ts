@@ -1,8 +1,5 @@
-import { _decorator } from "cc";
 import { MyResManager } from "../manager/ResManager";
-const { ccclass, property } = _decorator;
 
-@ccclass("DisposableObject")
 export class DisposableObject {
     private _isValid: boolean = true;
     get isValid(): boolean {
